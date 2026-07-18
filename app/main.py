@@ -130,6 +130,12 @@ def test():
     
 @app.middleware("http")   
 async def custom_middleware(request:Request,call_next):
+    # Strip /api prefix if present (useful when deployed on Vercel behind rewrites)
+    if request.scope["path"].startswith("/api"):
+        request.scope["path"] = request.scope["path"][4:]
+        if not request.scope["path"]:
+            request.scope["path"] = "/"
+
     start = perf_counter()    
     response : Response = await call_next(request)
     
