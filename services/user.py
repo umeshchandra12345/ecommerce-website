@@ -47,16 +47,18 @@ class UserService(BaseService):
             "id": str(user.id)
         })
         
-        
-        send_email_with_template.delay(
-                recipients=[user.email],
-                subject="Verify Your account with FastShip",
-                context={
-                    "username": user.name,
-                    "verification_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/verify?token={token}"
-                },
-                template_name="mail_email.verify.html",
-            )
+        try:
+            send_email_with_template.delay(
+                    recipients=[user.email],
+                    subject="Verify Your account with FastShip",
+                    context={
+                        "username": user.name,
+                        "verification_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/verify?token={token}"
+                    },
+                    template_name="mail_email.verify.html",
+                )
+        except Exception:
+            pass  # Silently skip if Celery/Redis is unavailable
         
         return user
 
@@ -104,15 +106,18 @@ class UserService(BaseService):
         token = generate_url_safe_token({"id": str(user.id)}, salt="password-reset")
             
         if self.notification_service:
-            send_email_with_template.delay(
-                recipients=[user.email],
-                subject="FastShip Account Password Reset",
-                context={
-                    "username": user.name,
-                    "reset_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
-                },
-                template_name="mail_password_reset.html",
-            )
+            try:
+                send_email_with_template.delay(
+                    recipients=[user.email],
+                    subject="FastShip Account Password Reset",
+                    context={
+                        "username": user.name,
+                        "reset_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
+                    },
+                    template_name="mail_password_reset.html",
+                )
+            except Exception:
+                pass  # Silently skip if Celery/Redis is unavailable
         
     async def reset_password(self, token: str, password: str)->bool:
         token_data = decode_url_safe_token(
