@@ -58,6 +58,7 @@ app = FastAPI(
         "email":"support@fastship.com",
     },
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan_handler,
     openapi_tags=[
         {
             "name":APITag.SHIPMENT,
