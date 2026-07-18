@@ -1,3 +1,4 @@
+import logging
 from time import sleep
 
 from asgiref.sync import async_to_sync
@@ -29,10 +30,17 @@ app = Celery(
     backend=db_settings.REDIS_URL(9),
     broker_connection_retry_on_startup=True
 )
+logger = logging.getLogger(__name__)
+
+
 @app.task
 def add_log(log:str) -> None:
-    with open("file.log","a")as file:
-        file.write(f"{log}\n")
+    logger.info(log)
+    try:
+        with open("file.log","a")as file:
+            file.write(f"{log}\n")
+    except OSError:
+        pass
 
 @app.task
 def send_mail(

@@ -10,6 +10,6 @@ client = Client(
 
 client.messages.create(
     from_=notification_settings.TWILIO_NUMBER,
-    to="1010101010"
+    to="1010101010",
     body=""
 )

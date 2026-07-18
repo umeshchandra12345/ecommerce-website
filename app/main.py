@@ -7,9 +7,8 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import BackgroundTasks, FastAPI, Depends, Response
+from fastapi import BackgroundTasks, FastAPI, Depends, Response, Request
 from fastapi.responses import JSONResponse
-from h11 import Request
 from scalar_fastapi import get_scalar_api_reference
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
