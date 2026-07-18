@@ -157,6 +157,35 @@ def read_root():
         "message": "welcome to fastship API",
         }
 
+@app.get("/debug")
+async def debug_info():
+    import os
+    import traceback
+    info = {
+        "database_url_set": bool(os.environ.get("DATABASE_URL")),
+        "database_url_prefix": (os.environ.get("DATABASE_URL", ""))[:30] + "..." if os.environ.get("DATABASE_URL") else "NOT SET",
+    }
+    # Test DB connection
+    try:
+        from app.database.session import async_session
+        async with async_session() as session:
+            from sqlalchemy import text
+            result = await session.execute(text("SELECT 1"))
+            info["db_connection"] = "OK"
+    except Exception as e:
+        info["db_connection"] = f"FAILED: {type(e).__name__}: {str(e)}"
+        info["db_traceback"] = traceback.format_exc()
+    
+    # Test seller creation (dry run)
+    try:
+        from api.schemas.seller import SellerCreate
+        s = SellerCreate(name="test", email="t@t.com", password="p", address="a", zip_code=1)
+        info["schema_validation"] = "OK"
+    except Exception as e:
+        info["schema_validation"] = f"FAILED: {str(e)}"
+    
+    return info
+
 ### Scalar API Documentation
 @app.get("/docs", include_in_schema=False)
 def get_scalar_docs():
