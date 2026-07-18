@@ -1,0 +1,50 @@
+.shipment-list-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--code-bg);
+  border-right: 1px solid var(--border);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.list-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.list-header .badge {
+  font-size: 12px;
+  background: var(--border);
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.shipment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+@media (max-width: 1024px) {
+  .shipment-list-container {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    height: auto;
+    max-height: 400px;
+  }
+}

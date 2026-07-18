@@ -1,0 +1,58 @@
+.shipment-tracker {
+  border: 1px solid #545454;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+  margin: 1rem;
+  text-align: left;
+  background-color: var(--bg);
+}
+
+.tracker-form {
+  margin: 1.5rem 0;
+}
+
+.tracker-form .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tracker-input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.token-input {
+  font-family: var(--mono);
+}
+
+.tracker-btn {
+  width: fit-content;
+}
+
+.loading-message {
+  font-size: 14px;
+  color: #3b82f6;
+  margin: 12px 0;
+}
+
+.error-message {
+  font-size: 14px;
+  color: #ef4444;
+  margin: 12px 0;
+  padding: 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.tracker-result {
+  margin-top: 20px;
+}
+
+.tracker-result h3 {
+  font-size: 16px;
+  color: var(--text-h);
+  margin-bottom: 10px;
+}

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastShip - Shipment Tracking</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f2f2f2;
+            font-family: "Manrope", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .shipment {
+            --padding: 30px;
+            position: relative;
+            width: 90vw;
+            max-width: 560px;
+            margin: 40px auto;
+            padding: var(--padding);
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .status {
+            position: absolute;
+            right: var(--padding);
+            top: var(--padding);
+            padding: .5em 1em;
+            border-radius: 1em;
+            color: #545454;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: lowercase;
+            background-color: #f2f2f2;
+        }
+
+        .img-container {
+            width: 80px;
+            height: 80px;
+            background-color: #f2f2f2;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-container>svg {
+            width: 60%;
+            height: 60%;
+            color: #545454;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .detail {
+            font-weight: 500;
+        }
+
+        h4 {
+            margin-bottom: .4em;
+            font-size: 14px;
+            font-weight: inherit;
+            color: hsl(0, 0%, 50%);
+        }
+
+        p {
+            font-size: 16px;
+            color: black;
+            font-weight: 600;
+        }
+
+        .timeline {
+            margin-left: 10px;
+        }
+
+        .event {
+            --padding-left: 40px;
+            position: relative;
+            border-left: 1px solid grey;
+            padding-left: var(--padding-left);
+            padding-bottom: 20px;
+        }
+
+        .event:last-child {
+            border: none;
+            padding-bottom: 5px;
+        }
+
+        .event .title-wrapper {
+            position: relative;
+            font-size: 16px;
+            margin-bottom: .5em;
+        }
+
+        .event h3 {
+            font-weight: 600;
+            font-size: 16px;
+            color: #000;
+        }
+
+        .event .dot {
+            --size: 8px;
+            position: absolute;
+            top: calc(50% - (var(--size)/2));
+            left: calc(var(--padding-left) * -1 - (var(--size)/2));
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            background-color: black;
+            outline: 10px solid white;
+        }
+
+        .event>p {
+            color: #545454;
+            font-size: 14px;
+        }
+
+        .event>p>span {
+            color: #999;
+            margin-right: 5px;
+        }
+
+        /* Tags Section */
+        .tags-heading {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: inherit;
+            color: hsl(0, 0%, 50%);
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tag-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            padding: 12px 16px;
+            flex: 1 1 calc(50% - 10px);
+            min-width: 180px;
+        }
+
+        .tag-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .tag-card p {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Loading / Error styling */
+        .status-msg {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            padding: 40px 0;
+            width: 100%;
+        }
+
+        /* Status Colors to match screenshot */
+        .placed {
+            color: hsl(35, 100%, 20%);
+            background-color: hsl(35, 75%, 80%);
+        }
+
+        .in_transit {
+            color: hsl(43, 100%, 20%);
+            background-color: hsl(43, 75%, 80%);
+        }
+
+        .out_for_delivery {
+            color: hsl(78, 100%, 20%);
+            background-color: hsl(78, 75%, 80%);
+        }
+
+        .delivered {
+            color: hsl(98, 100%, 20%);
+            background-color: hsl(98, 75%, 80%);
+        }
+
+        .cancelled {
+            color: hsl(0, 0%, 20%);
+            background-color: hsl(0, 0%, 80%);
+        }
+    </style>
+</head>
+<body>
+    <div class="shipment" id="shipment-box">
+        <div class="status-msg" id="status-message">Loading shipment details...</div>
+        
+        <!-- Details inside the card (initially hidden) -->
+        <div id="details-wrapper" style="display: none; width: 100%;">
+            <div class="status" id="shipment-status">Status</div>
+            <div class="img-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package">
+                    <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
+                    <path d="M12 22V12"/>
+                    <polyline points="3.29 7 12 12 20.71 7"/>
+                    <path d="m7.5 4.27 9 5.15"/>
+                </svg>
+            </div>
+            <h2 id="order-title" style="margin-top: 10px;">Order #</h2>
+            <div class="details" style="margin-top: 20px;">
+                <div class="detail">
+                    <h4>Content</h4>
+                    <p id="shipment-content">-</p>
+                </div>
+                <div class="detail">
+                    <h4>Carrier</h4>
+                    <p id="shipment-carrier">-</p>
+                </div>
+                <div class="detail">
+                    <h4>Started At</h4>
+                    <p id="shipment-started">-</p>
+                </div>
+                <div class="detail">
+                    <h4>Estimated Delivery</h4>
+                    <p id="shipment-delivery">-</p>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 25px;">Order History</h4>
+            <div class="timeline" id="timeline-container" style="margin-top: 15px;">
+                <!-- Populate dynamically -->
+            </div>
+
+            <h4 class="tags-heading" style="margin-top: 25px;">Shipment Tags</h4>
+            <div class="tags-container" id="tags-container">
+                <!-- Populate dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const candidateIds = [
+            "886f107a-38e9-4b34-89c7-5b2da636193b",
+            "d9b6cbb3-125d-4e01-8593-5b12f3b851ca",
+            "01b6c1a5-8b0a-4653-ba55-47668d65c33a",
+            "02c5fd4d-5476-4bd5-b0ee-706cb9a9c8e1",
+            "02d23a11-4317-4cf7-97c6-7269a86d0419"
+        ];
+
+        function formatDate(dateStr) {
+            if (!dateStr) return "-";
+            const date = new Date(dateStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}-${month}-${year} ${hours}:${minutes}`;
+        }
+
+        async function init() {
+            const statusMessage = document.getElementById('status-message');
+            try {
+                // 1. Automatic Authentication
+                statusMessage.textContent = "Authenticating with API server...";
+                const params = new URLSearchParams();
+                params.append('username', 'scalar_seller@example.com');
+                params.append('password', 'codered');
+
+                const loginRes = await fetch('http://localhost:8000/seller/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                });
+
+                if (!loginRes.ok) {
+                    throw new Error('Authentication failed. Ensure database has seeded seller.');
+                }
+
+                const loginData = await loginRes.json();
+                const token = loginData.access_token;
+
+                // 2. Fetch shipment details by trying candidates
+                statusMessage.textContent = "Fetching shipment data...";
+                let shipmentData = null;
+
+                for (const id of candidateIds) {
+                    try {
+                        const response = await fetch(`http://localhost:8000/shipment/?id=${id}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        if (response.ok) {
+                            shipmentData = await response.json();
+                            break;
+                        }
+                    } catch (e) {
+                        // Continue to next ID
+                    }
+                }
+
+                if (!shipmentData) {
+                    throw new Error('No seeded shipment could be found or fetched.');
+                }
+
+                // 3. Render the fetched data
+                renderShipment(shipmentData);
+
+            } catch (err) {
+                statusMessage.innerHTML = `<span style="color: red;">Error: ${err.message}</span><br><br><span style="font-size: 14px; color: #777;">Make sure your API server is running on http://localhost:8000</span>`;
+            }
+        }
+
+        function renderShipment(data) {
+            // Hide loading indicator, show data wrapper
+            document.getElementById('status-message').style.display = 'none';
+            document.getElementById('details-wrapper').style.display = 'block';
+
+            // Populate status
+            const statusBadge = document.getElementById('shipment-status');
+            const statusVal = data.status || "placed";
+            statusBadge.className = `status ${statusVal}`;
+            statusBadge.textContent = statusVal.replace('_', ' ');
+
+            // Order title
+            const orderIdShort = data.id.replace(/-/g, '').slice(-10);
+            document.getElementById('order-title').textContent = `Order #${orderIdShort}`;
+
+            // Core details
+            document.getElementById('shipment-content').textContent = data.content ? data.content.charAt(0).toUpperCase() + data.content.slice(1) : "-";
+            document.getElementById('shipment-carrier').textContent = data.delivery_partner ? data.delivery_partner.name : "Not Assigned";
+            document.getElementById('shipment-started').textContent = formatDate(data.created_at);
+            document.getElementById('shipment-delivery').textContent = formatDate(data.estimated_delivery);
+
+            // Timeline history
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineContainer.innerHTML = '';
+            
+            if (data.timeline && data.timeline.length > 0) {
+                const sortedTimeline = [...data.timeline].reverse();
+                sortedTimeline.forEach(event => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = 'event';
+                    
+                    const titleWrapper = document.createElement('div');
+                    titleWrapper.className = 'title-wrapper';
+                    
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    
+                    const eventTitle = document.createElement('h3');
+                    eventTitle.textContent = event.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    
+                    titleWrapper.appendChild(dot);
+                    titleWrapper.appendChild(eventTitle);
+                    
+                    const eventDesc = document.createElement('p');
+                    eventDesc.innerHTML = `<span>${formatDate(event.created_at)}</span> ${event.description}`;
+                    
+                    eventDiv.appendChild(titleWrapper);
+                    eventDiv.appendChild(eventDesc);
+                    timelineContainer.appendChild(eventDiv);
+                });
+            } else {
+                timelineContainer.innerHTML = '<p style="color: #666; font-size: 14px;">No tracking history yet.</p>';
+            }
+
+            // Tags
+            const tagsContainer = document.getElementById('tags-container');
+            tagsContainer.innerHTML = '';
+            if (data.tags && data.tags.length > 0) {
+                data.tags.forEach(tag => {
+                    const tagCard = document.createElement('div');
+                    tagCard.className = 'tag-card';
+                    
+                    const tagTitle = document.createElement('h4');
+                    tagTitle.textContent = tag.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    
+                    const tagDesc = document.createElement('p');
+                    tagDesc.textContent = tag.instruction;
+                    
+                    tagCard.appendChild(tagTitle);
+                    tagCard.appendChild(tagDesc);
+                    tagsContainer.appendChild(tagCard);
+                });
+            } else {
+                tagsContainer.innerHTML = '<p style="color: #666; font-size: 14px;">No tags associated with this shipment.</p>';
+            }
+        }
+
+        // Start initialization on load
+        window.onload = init;
+    </script>
+</body>
+</html>
