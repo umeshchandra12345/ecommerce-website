@@ -64,6 +64,8 @@ export interface DeliveryPartnerCreate {
   email: string;
   /** Max Handling Capacity */
   max_handling_capacity: number;
+  /** Serviceable Zip Codes */
+  serviceable_zip_codes: number[];
   /** Password */
   password: string;
 }
@@ -105,9 +107,9 @@ export interface SellerCreate {
   /** Password */
   password: string;
   /** Address */
-  address: string;
+  address?: string | null;
   /** Zip Code */
-  zip_code: number;
+  zip_code?: number | null;
 }
 
 /** SellerRead */
