@@ -143,6 +143,7 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     context["request"] = request
     template = template_env.get_template("track.html")
     html_content = template.render(**context)
+    html_content += f"\n<!-- DEBUG: TEMPLATE_DIR={TEMPLATE_DIR}, lines={len(html_content.splitlines())} -->"
     return HTMLResponse(content=html_content)
 
 ###Get review form for a shipment
