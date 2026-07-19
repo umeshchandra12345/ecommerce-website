@@ -648,6 +648,10 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     html_content = template.render(**context)
     return HTMLResponse(content=html_content)
 
+@router.get("/track-html", response_class=HTMLResponse)
+async def track_html(request: Request, id: UUID, service: ShipmentServiceDep):
+    return await track_shipment(request, id, service)
+
 ###Get review form for a shipment
 @router.get("/review")
 async def get_review_form(request:Request,token:str,):
