@@ -26,12 +26,18 @@ export default function DashboardPage() {
   const { isLoading, isError, data, refetch } = useQuery({
     queryKey: ["shipments", user, token],
     queryFn: async () => {
-      const userApi = user === "seller" ? api.seller : api.partner
-      const { data } = await userApi.getShipments()
-      return data
+      if (!user) return []
+      if (user === "seller") {
+        const { data } = await api.seller.getShipments()
+        return data
+      } else if (user === "partner") {
+        const { data } = await api.partner.getShipments()
+        return data
+      }
+      return []
     },
     retry: 2,
-    enabled: !!user && !!token,
+    enabled: !!user && !!token && (user === "seller" || user === "partner"),
   })
 
   if (isError) {

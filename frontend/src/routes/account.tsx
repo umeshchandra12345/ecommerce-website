@@ -25,11 +25,18 @@ export default function AccountPage() {
   const { isLoading, isError, data, refetch } = useQuery({
     queryKey: ["account", token, user],
     queryFn: async () => {
-      const getUserProfile = user === "seller" ? api.seller.getSellerProfile : api.partner.getDeliveryPartnerProfile
-      const { data } = await getUserProfile()
-      return data
+      if (!user) return null
+      if (user === "seller") {
+        const { data } = await api.seller.getSellerProfile()
+        return data
+      } else if (user === "partner") {
+        const { data } = await api.partner.getDeliveryPartnerProfile()
+        return data
+      }
+      return null
     },
     retry: 2,
+    enabled: !!user && !!token && (user === "seller" || user === "partner"),
   })
 
   if (isError) {
