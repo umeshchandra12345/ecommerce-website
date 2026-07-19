@@ -15,12 +15,12 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/shipment/(.*)",
       "dest": "app/main.py"
     },
     {
-      "src": "/shipment/(.*)",
-      "dest": "/api/shipment/$1"
+      "src": "/api/(.*)",
+      "dest": "app/main.py"
     },
     {
       "src": "/assets/(.*)",
