@@ -403,7 +403,6 @@ TRACK_HTML = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- STATUS_DEBUG: status={{ status|string }}, code={{ verification_code }} -->
         {% if 'out_for_delivery' in status|string or verification_code %}
         <!-- OTP Box -->
         <div class="otp-box">
