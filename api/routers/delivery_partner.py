@@ -15,6 +15,7 @@ templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 
 from ..dependencies import DeliveryPartnerDep, DeliveryPartnerServiceDep, SessionDep, get_partner_access_token, get_current_partner
 from ..schemas.delivery_partner import DeliveryPartnerCreate, DeliveryPartnerRead, DeliveryPartnerUpdate, TokenResponse
+from ..schemas.shipment import ShipmentRead
 from services.seller import SellerService
 from core.exceptions import NothingToUpdate
 
@@ -28,7 +29,7 @@ async def register_delivery_partner(
 ):
     return await service.add(seller)
 
-@router.get("/shipments")
+@router.get("/shipments", response_model=list[ShipmentRead])
 async def get_shipments(
     partner: Annotated[DeliveryPartner, Depends(get_current_partner)],
 ):

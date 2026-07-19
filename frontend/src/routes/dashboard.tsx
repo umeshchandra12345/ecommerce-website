@@ -70,7 +70,7 @@ export default function DashboardPage() {
                 <div className="grid auto-rows-min gap-4 md:grid-cols-4">
                   {
                     data.map((shipment) => (
-                      <ShipmentCard shipment={shipment} />
+                      <ShipmentCard key={shipment.id} shipment={shipment} />
                     ))
                   }
                 </div>

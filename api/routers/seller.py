@@ -20,6 +20,7 @@ from utils import TEMPLATE_DIR, decode_access_token, generate_access_token
 
 from ..dependencies import SellerServiceDep, SessionDep, get_seller_access_token, get_current_seller
 from ..schemas.seller import SellerCreate, SellerRead, TokenResponse
+from ..schemas.shipment import ShipmentRead
 from services.seller import SellerService
 from core.exceptions import BadCredentials, ClientNotVerified
 
@@ -33,7 +34,7 @@ async def register_seller(
 ):
     return await service.add(seller)
 
-@router.get("/shipments")
+@router.get("/shipments", response_model=list[ShipmentRead])
 async def get_shipments(
     seller: Annotated[Seller, Depends(get_current_seller)],
 ):
