@@ -27,6 +27,15 @@ class UserService(BaseService):
         
     async def _add_user(self, data: dict, router_prefix: str) -> User:
         user_data = data.copy()
+        email = user_data.get("email")
+        if email:
+            existing_user = await self._get_by_email(email)
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email is already registered. Please log in."
+                )
+
         password = user_data.pop("password", None)
         try:
             if not password:
@@ -77,8 +86,10 @@ class UserService(BaseService):
         return user
         
     async def _get_by_email(self, email) -> User | None:
+        if not email:
+            return None
         return await self.session.scalar(
-            select(self.model).where(self.model.email == email)
+            select(self.model).where(self.model.email == email).limit(1)
         )   
 
     async def _generate_token(self, email: str, password: str) -> str:
