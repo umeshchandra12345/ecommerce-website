@@ -13,11 +13,13 @@
       "use": "@vercel/python"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/shipment/(.*)",
-      "dest": "app/main.py"
-    },
+      "source": "/shipment/:path*",
+      "destination": "/api/shipment/:path*"
+    }
+  ],
+  "routes": [
     {
       "src": "/api/(.*)",
       "dest": "app/main.py"
