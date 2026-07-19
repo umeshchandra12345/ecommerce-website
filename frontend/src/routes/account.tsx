@@ -22,19 +22,21 @@ export default function AccountPage() {
     return <Navigate to="/" />
   }
 
-  const { isLoading, isError, data } = useQuery({
-    queryKey: ["account"],
+  const { isLoading, isError, data, refetch } = useQuery({
+    queryKey: ["account", token, user],
     queryFn: async () => {
       const getUserProfile = user === "seller" ? api.seller.getSellerProfile : api.partner.getDeliveryPartnerProfile
       const { data } = await getUserProfile()
       return data
-    }
+    },
+    retry: 2,
   })
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex flex-col gap-4 h-screen items-center justify-center">
         <h1 className="text-2xl font-bold">Error loading account details</h1>
+        <Button onClick={() => refetch()}>Retry</Button>
       </div>
     )
   }
