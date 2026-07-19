@@ -39,6 +39,7 @@ description="""Delivery Management System for sellers and delivery agents
 - Track nd update shipment status 
 - Email and SMS notifications
 """
+# FastAPI master application instance with CORS and Vercel routing
 app = FastAPI(
     title="FastShip",
     description=description,
