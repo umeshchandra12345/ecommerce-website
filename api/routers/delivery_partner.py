@@ -35,6 +35,12 @@ async def get_shipments(
 ):
     return partner.shipments
 
+@router.get("/me", response_model=DeliveryPartnerRead)
+async def get_partner_profile(
+    partner: Annotated[DeliveryPartner, Depends(get_current_partner)],
+):
+    return partner
+
 ###login delivery partner
 @router.post("/token")
 async def login_delivery_partner(

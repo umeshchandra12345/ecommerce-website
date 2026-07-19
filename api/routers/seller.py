@@ -40,6 +40,12 @@ async def get_shipments(
 ):
     return seller.shipments
 
+@router.get("/me", response_model=SellerRead)
+async def get_seller_profile(
+    seller: Annotated[Seller, Depends(get_current_seller)],
+):
+    return seller
+
 ###login seller
 @router.post("/token", response_model=TokenResponse)
 async def login_for_access_token(
