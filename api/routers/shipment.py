@@ -1,6 +1,8 @@
 from typing import Annotated
 from uuid import UUID
 
+__version__ = "1.0.1"
+
 from fastapi import APIRouter, Form, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
