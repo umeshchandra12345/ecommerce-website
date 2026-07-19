@@ -64,10 +64,9 @@ class ShipmentService(BaseService):
         
         
         
-        if shipment_update.status == ShipmentStatus.delivered:
+        if shipment_update.status == ShipmentStatus.delivered or shipment_update.status == "delivered":
             code = await get_shipment_verification_code(shipment.id)
-            
-            if code!=shipment_update.verification_code:
+            if code and str(code).strip() != str(shipment_update.verification_code or "").strip():
                 raise ClientNotAuthorized()
                 
         update = shipment_update.model_dump(exclude_none=True,exclude=["verification_code"],)
