@@ -114,9 +114,15 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     context["partner"] = shipment.delivery_partner.name if shipment.delivery_partner else "Not Assigned"
     context["timeline"]=list(reversed(shipment.timeline)) if shipment.timeline else []
     
-    if shipment.status == "out_for_delivery" or shipment.status == ShipmentStatus.out_for_delivery:
-        from app.database.redis import get_shipment_verification_code
-        context["verification_code"] = await get_shipment_verification_code(shipment.id)
+    current_status = getattr(shipment.status, "value", str(shipment.status or ""))
+    if current_status == "out_for_delivery":
+        from app.database.redis import get_shipment_verification_code, add_shipment_verification_code
+        from random import randint
+        code = await get_shipment_verification_code(shipment.id)
+        if not code:
+            code = str(randint(100_000, 999_999))
+            await add_shipment_verification_code(shipment.id, int(code))
+        context["verification_code"] = str(code)
     else:
         context["verification_code"] = None
     
