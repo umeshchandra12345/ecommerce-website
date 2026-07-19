@@ -1,4 +1,3 @@
-import React from "react"
 import { Printer, Package, ShieldCheck, MapPin } from "lucide-react"
 import { Button } from "./ui/button"
 import {
@@ -6,9 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog"
-import type { Shipment } from "~/lib/client"
 
-export function ShippingLabelModal({ shipment }: { shipment: Shipment }) {
+
+export function ShippingLabelModal({ shipment: _shipment }: { shipment: any }) {
+  const shipment = _shipment as any
   const trackingUrl = `https://ecommerce-website-kappa-mauve.vercel.app/shipment/track?id=${shipment.id}`
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(
     trackingUrl

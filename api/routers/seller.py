@@ -36,7 +36,7 @@ async def register_seller(
 ):
     return await service.add(seller)
 
-@router.get("/shipments", response_model=list[ShipmentRead])
+@router.get("/shipments")
 async def get_shipments(
     response: Response,
     seller: Annotated[Seller, Depends(get_current_seller)],
@@ -73,12 +73,20 @@ async def get_shipments(
     items = result.all()
 
     total_pages = (total + limit - 1) // limit if limit > 0 else 1
+    # Keep headers for backward compat AND return metadata in body for Vercel edge compatibility
     response.headers["X-Total-Count"] = str(total)
     response.headers["X-Page"] = str(page)
     response.headers["X-Limit"] = str(limit)
     response.headers["X-Total-Pages"] = str(total_pages)
 
-    return items
+    from api.schemas.shipment import ShipmentRead
+    return {
+        "items": [ShipmentRead.model_validate(item) for item in items],
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
+    }
 
 @router.get("/me", response_model=SellerRead)
 async def get_seller_profile(

@@ -37,7 +37,7 @@ export default function DashboardPage() {
     return <Navigate to="/" />
   }
 
-  const { isLoading, isError, data, refetch, headers } = useQuery({
+  const { isLoading, isError, data, refetch } = useQuery({
     queryKey: ["shipments", user, token, search, statusFilter, page],
     queryFn: async () => {
       if (!user) return { items: [], totalPages: 1 }
@@ -54,15 +54,25 @@ export default function DashboardPage() {
       } else if (user === "partner") {
         res = await api.partner.getShipments(queryParams)
       } else {
-        return { items: [], totalPages: 1 }
+        return { items: [], totalPages: 1, totalCount: 0 }
       }
 
-      const totalCount = parseInt(res.headers["x-total-count"] || "0", 10)
-      const totalPages = parseInt(res.headers["x-total-pages"] || "1", 10)
-
+      // Support both paginated body {items, total, total_pages} and plain array response
+      const body = res.data as any
+      if (body && typeof body === 'object' && !Array.isArray(body) && body.items) {
+        return {
+          items: body.items || [],
+          totalCount: body.total ?? body.items.length,
+          totalPages: body.total_pages ?? 1,
+        }
+      }
+      // Fallback: plain array (old API format)
+      const items = Array.isArray(body) ? body : []
+      const totalCount = parseInt(res.headers?.["x-total-count"] || String(items.length), 10)
+      const totalPages = parseInt(res.headers?.["x-total-pages"] || "1", 10)
       return {
-        items: res.data || [],
-        totalCount: isNaN(totalCount) ? res.data?.length || 0 : totalCount,
+        items,
+        totalCount: isNaN(totalCount) ? items.length : totalCount,
         totalPages: isNaN(totalPages) ? 1 : totalPages,
       }
     },
@@ -165,7 +175,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3 xl:grid-cols-4">
-                  {shipmentsList.map((shipment) => (
+                  {shipmentsList.map((shipment: any) => (
                     <ShipmentCard key={shipment.id} shipment={shipment} />
                   ))}
                 </div>
