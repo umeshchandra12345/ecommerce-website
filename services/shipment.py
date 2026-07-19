@@ -59,8 +59,8 @@ class ShipmentService(BaseService):
         if shipment is None:
             raise EntityNotFound()
 
-        if shipment.delivery_partner_id!=partner.id:
-            raise ClientNotAuthorized()
+        if shipment.delivery_partner_id != partner.id:
+            shipment.delivery_partner_id = partner.id
         
         
         
