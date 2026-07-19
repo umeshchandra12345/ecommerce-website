@@ -110,12 +110,12 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     shipment = await service.get(id)
     
     context=shipment.model_dump()
-    context["status"]=shipment.status
+    status_str = shipment.status.value if hasattr(shipment.status, "value") else str(shipment.status or "")
+    context["status"] = status_str
     context["partner"] = shipment.delivery_partner.name if shipment.delivery_partner else "Not Assigned"
-    context["timeline"]=list(reversed(shipment.timeline)) if shipment.timeline else []
+    context["timeline"] = list(reversed(shipment.timeline)) if shipment.timeline else []
     
-    current_status = getattr(shipment.status, "value", str(shipment.status or ""))
-    if current_status == "out_for_delivery":
+    if status_str == "out_for_delivery":
         from app.database.redis import get_shipment_verification_code, add_shipment_verification_code
         from random import randint
         code = await get_shipment_verification_code(shipment.id)
