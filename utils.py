@@ -11,7 +11,9 @@ serializer = URLSafeTimedSerializer(security_settings.JWT_SECRET)
 APP_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = APP_DIR / "templates"
 if not (TEMPLATE_DIR / "track.html").exists():
-    if (APP_DIR / ".." / "templates" / "track.html").exists():
+    if (APP_DIR / "app" / "templates" / "track.html").exists():
+        TEMPLATE_DIR = (APP_DIR / "app" / "templates").resolve()
+    elif (APP_DIR / ".." / "templates" / "track.html").exists():
         TEMPLATE_DIR = (APP_DIR / ".." / "templates").resolve()
     elif (Path.cwd() / "templates" / "track.html").exists():
         TEMPLATE_DIR = (Path.cwd() / "templates").resolve()

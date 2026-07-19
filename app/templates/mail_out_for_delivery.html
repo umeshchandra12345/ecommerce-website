@@ -1,0 +1,21 @@
+<body>
+<p>Hi 👋,</p>
+<p>Your Order with {{ seller }} is out for delivery by</p>
+<p> {{ partner }} and is on it's way to you. Use the below link
+    to track your order</p>
+
+{% if verification_code%}
+<p>Share {{verification_code}} with delivery executive to recieve your package.</p>
+{% endif %}
+<a href="http://localhost:8000/shipment/track?id={{ id }}"
+style="background:#2563eb;color:white;padding:10px 16px;
+text-decoration:none;border-radius:5px;"
+>Track Now</a>
+<br>
+<p>Powered by FastShip</p>
+<hr>
+<p><strong>Item:</strong> {{ content }}</p>
+<p><strong>Destination:</strong> {{ destination }}</p>
+<p><strong>Estimated delivery:</strong> {{ estimated_delivery }}</p>
+<p>Thank you for shopping with us!</p>
+</body>
