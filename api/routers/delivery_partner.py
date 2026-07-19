@@ -13,11 +13,15 @@ from utils import decode_access_token, TEMPLATE_DIR
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from ..dependencies import DeliveryPartnerDep, DeliveryPartnerServiceDep, SessionDep, get_partner_access_token, get_current_partner
 from ..schemas.delivery_partner import DeliveryPartnerCreate, DeliveryPartnerRead, DeliveryPartnerUpdate, TokenResponse
 from ..schemas.shipment import ShipmentRead
 from services.seller import SellerService
 from core.exceptions import NothingToUpdate
+from app.database.models import Shipment
 
 router = APIRouter(prefix="/partner", tags=[APITag.PARTNER])
 
@@ -32,8 +36,15 @@ async def register_delivery_partner(
 @router.get("/shipments", response_model=list[ShipmentRead])
 async def get_shipments(
     partner: Annotated[DeliveryPartner, Depends(get_current_partner)],
+    session: SessionDep,
 ):
-    return partner.shipments
+    stmt = (
+        select(Shipment)
+        .where(Shipment.delivery_partner_id == partner.id)
+        .options(selectinload(Shipment.timeline), selectinload(Shipment.tags))
+    )
+    result = await session.scalars(stmt)
+    return result.all()
 
 @router.get("/me", response_model=DeliveryPartnerRead)
 async def get_partner_profile(

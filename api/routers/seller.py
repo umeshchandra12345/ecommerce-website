@@ -6,9 +6,9 @@ from fastapi.responses import HTMLResponse
 from httpx import request
 from pydantic import EmailStr
 from api.tags import APITag
-from app.database.models import Seller
+from app.database.models import Seller, Shipment
 from app.database.redis import add_jti_to_blacklist
-from fastapi import APIRouter, Depends, Form, HTTPException, Request,status
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 import logging
 from fastapi.security import OAuth2PasswordRequestForm
 from app.config import app_settings
@@ -17,6 +17,8 @@ from datetime import timedelta
 from app.config import security_settings
 
 from utils import TEMPLATE_DIR, decode_access_token, generate_access_token
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from ..dependencies import SellerServiceDep, SessionDep, get_seller_access_token, get_current_seller
 from ..schemas.seller import SellerCreate, SellerRead, TokenResponse
@@ -37,8 +39,15 @@ async def register_seller(
 @router.get("/shipments", response_model=list[ShipmentRead])
 async def get_shipments(
     seller: Annotated[Seller, Depends(get_current_seller)],
+    session: SessionDep,
 ):
-    return seller.shipments
+    stmt = (
+        select(Shipment)
+        .where(Shipment.seller_id == seller.id)
+        .options(selectinload(Shipment.timeline), selectinload(Shipment.tags))
+    )
+    result = await session.scalars(stmt)
+    return result.all()
 
 @router.get("/me", response_model=SellerRead)
 async def get_seller_profile(
