@@ -3,6 +3,7 @@ import { useContext } from "react"
 import { Navigate } from "react-router"
 import { AppSidebar } from "~/components/app-sidebar"
 import ShipmentCard from "~/components/shipment-card"
+import { Button } from "~/components/ui/button"
 import Loading from "~/components/ui/loading"
 import { Separator } from "~/components/ui/separator"
 import {
@@ -22,19 +23,22 @@ export default function DashboardPage() {
     return <Navigate to="/" />
   }
 
-  const { isLoading, isError, data } = useQuery({
-    queryKey: ["shipments"],
+  const { isLoading, isError, data, refetch } = useQuery({
+    queryKey: ["shipments", user, token],
     queryFn: async () => {
       const userApi = user === "seller" ? api.seller : api.partner
       const { data } = await userApi.getShipments()
       return data
-    }
+    },
+    retry: 2,
+    enabled: !!user && !!token,
   })
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex flex-col gap-4 h-screen items-center justify-center">
         <h1 className="text-2xl font-bold">Error loading shipments</h1>
+        <Button onClick={() => refetch()}>Retry</Button>
       </div>
     )
   }
