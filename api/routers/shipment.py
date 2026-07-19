@@ -125,14 +125,14 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
         
     )
 
-###Submit a review for a shipment
+###Get review form for a shipment
 @router.get("/review")
-async def submit_review(request:Request,token:str,):
-    templates.TemplateResponse(
+async def get_review_form(request:Request,token:str,):
+    return templates.TemplateResponse(
         request=request,
         name="review.html",
         context={
-            "request_url":f"http://{app_settings.APP_DOMIAN}/shipment/review?token={token}"
+            "request_url":f"http://{app_settings.APP_DOMAIN}/shipment/review?token={token}"
         }
     )
 

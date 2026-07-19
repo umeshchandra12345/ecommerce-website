@@ -89,15 +89,21 @@ class ShipmentEventService(BaseService):
                 template_name = "mail_out_for_delivery.html"
                 
                 code=randint(100_000 , 999_999)
-                await add_shipment_verification_code(shipment.id,code)
+                try:
+                    await add_shipment_verification_code(shipment.id,code)
+                except Exception:
+                    pass  # Redis unavailable on Vercel
                 
                 context["verification_code"]=code
                 if shipment.client_contact_phone:
-                    send_sms.delay(
-                        to=shipment.client_contact_phone,
-                        body=f"Your order is arriving soon! Share the {code} code with your "
-                        "delivery executive to receive your package"
-                    )
+                    try:
+                        send_sms.delay(
+                            to=shipment.client_contact_phone,
+                            body=f"Your order is arriving soon! Share the {code} code with your "
+                            "delivery executive to receive your package"
+                        )
+                    except Exception:
+                        pass  # Celery/Redis unavailable on Vercel
             case ShipmentStatus.delivered:
                 subject = "Your Order is Delivered✅"
                 context["seller"]= shipment.seller.name
@@ -112,9 +118,12 @@ class ShipmentEventService(BaseService):
         if not template_name:
             return
 
-        send_email_with_template.delay(
-            recipients=[shipment.client_contact_email],
-            subject=subject,
-            context=context,
-            template_name=template_name,
-        )
+        try:
+            send_email_with_template.delay(
+                recipients=[shipment.client_contact_email],
+                subject=subject,
+                context=context,
+                template_name=template_name,
+            )
+        except Exception:
+            pass  # Celery/Redis unavailable on Vercel

@@ -34,7 +34,6 @@ class ShipmentService(BaseService):
     async def add(self, shipment_create: ShipmentCreate, seller: Seller) -> Shipment:
         shipment = Shipment(
             **shipment_create.model_dump(),
-            status=ShipmentStatus.placed,
             estimated_delivery=datetime.now(timezone.utc) + timedelta(days=3),
             seller_id=seller.id,
         )
@@ -149,7 +148,6 @@ class ShipmentService(BaseService):
             status=ShipmentStatus.cancelled,
         )
         
-        shipment.status = ShipmentStatus.cancelled
         shipment.timeline.append(event)
         return await self._update(shipment)
     async def delete(self, id: UUID) -> None:

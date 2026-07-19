@@ -33,7 +33,14 @@ async def is_jti_blacklisted(jti:str)->bool:
         return False
     
 async def add_shipment_verification_code(id:UUID,code:int):
-    await _shipment_verification_codes.set(str(id),code)
+    try:
+        await _shipment_verification_codes.set(str(id),code)
+    except RedisError:
+        logger.exception("Failed to store shipment verification code in Redis")
     
 async def get_shipment_verification_code(id:UUID):
-    return str(await _shipment_verification_codes.get(str(id)))
+    try:
+        return str(await _shipment_verification_codes.get(str(id)))
+    except RedisError:
+        logger.exception("Failed to get shipment verification code from Redis")
+        return None

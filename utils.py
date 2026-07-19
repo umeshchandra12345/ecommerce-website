@@ -7,12 +7,6 @@ from itsdangerous import  BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from app.config import security_settings
 serializer = URLSafeTimedSerializer(security_settings.JWT_SECRET)
-#generate a token
-token = serializer.dumps({"email":"user@his.site"})
-
-#decode a token
-token_data = serializer.loads(token,max_age=timedelta(days=1).total_seconds())
-
 
 APP_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = APP_DIR / "templates"

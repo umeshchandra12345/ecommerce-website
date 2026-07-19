@@ -1,27 +1,21 @@
 from contextlib import asynccontextmanager
-from datetime import datetime
 from pathlib import Path
-import sys
+import logging
 from time import perf_counter
-from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import BackgroundTasks, FastAPI, Depends, Response, Request
 from fastapi.responses import JSONResponse
 from scalar_fastapi import get_scalar_api_reference
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.router import master_router
 from api.tags import APITag
-from app.database.session import create_db_tables, get_session
-from app.worker.tasks import add_log
+from app.database.session import create_db_tables
 from core.exceptions import InvalidToken, add_exception_handlers
-from services.notification import NotificationService
-from app.database.models import Seller, DeliveryPartner
-from utils import decode_url_safe_token
 from fastapi.routing import APIRoute
+
+logger = logging.getLogger(__name__)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -82,6 +76,7 @@ app.add_middleware(
         "http://127.0.0.1:5500",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://ecommerce-website-kappa-mauve.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -104,31 +99,6 @@ app.add_exception_handler(
     handler,
 )
 
-@app.get("/mail")
-async def send_test_mail(tasks:BackgroundTasks):
-    
-    tasks.add_task(
-        NotificationService().send_email,
-        recipients=["umeshpathakamuri1611@gmail.com"],
-        subject="Test Mail coming Through Twice",
-        body="You should not be interested in everybody...",
-        
-    )
-    
-    return {"detail":"Mail sent✅"}
-
-
-@app.get("/test")
-def test():
-    now=datetime.now()
-    background_task.delay(
-        f"Background Task { now.second}",
-        data={
-            "min":now.minute,
-            "sec":now.second,
-        }
-    )
-    
 @app.middleware("http")   
 async def custom_middleware(request:Request,call_next):
     # Strip /api prefix if present (useful when deployed on Vercel behind rewrites)
@@ -143,12 +113,9 @@ async def custom_middleware(request:Request,call_next):
     end=perf_counter()
     time_taken=round(end - start,2)
     
-    add_log(f"{request.method} {request.url} ({response.status_code}){time_taken} s ")    
+    logger.info(f"{request.method} {request.url} ({response.status_code}) {time_taken}s")
     return response
     
-
-def get_id():
-    return uuid4()
 
 #Server Running status 
 @app.get("/")
@@ -156,35 +123,6 @@ def read_root():
     return {
         "message": "welcome to fastship API",
         }
-
-@app.get("/debug")
-async def debug_info():
-    import os
-    import traceback
-    info = {
-        "database_url_set": bool(os.environ.get("DATABASE_URL")),
-        "database_url_prefix": (os.environ.get("DATABASE_URL", ""))[:30] + "..." if os.environ.get("DATABASE_URL") else "NOT SET",
-    }
-    # Test DB connection
-    try:
-        from app.database.session import async_session
-        async with async_session() as session:
-            from sqlalchemy import text
-            result = await session.execute(text("SELECT 1"))
-            info["db_connection"] = "OK"
-    except Exception as e:
-        info["db_connection"] = f"FAILED: {type(e).__name__}: {str(e)}"
-        info["db_traceback"] = traceback.format_exc()
-    
-    # Test seller creation (dry run)
-    try:
-        from api.schemas.seller import SellerCreate
-        s = SellerCreate(name="test", email="t@t.com", password="p", address="a", zip_code=1)
-        info["schema_validation"] = "OK"
-    except Exception as e:
-        info["schema_validation"] = f"FAILED: {str(e)}"
-    
-    return info
 
 ### Scalar API Documentation
 @app.get("/docs", include_in_schema=False)

@@ -66,17 +66,6 @@ class PasswordRequired(FastShipError):
 def _get_handler(status: int, detail: str):
     # Define
     def handler(request: Request, exception: Exception) -> Response:
-        # DEBUG PRINT STATEMENT 👇
-        from rich import print, panel
-        print(
-            panel.Panel(
-                exception.__class__.__name__,
-                title="Handled Exception",
-                border_style="red",
-            ),
-        )
-        # DEBUG PRINT STATEMENT 👆
-        
         # Raise HTTPException with given status and detail
         # can return JSONResponse as well
         raise HTTPException(

@@ -7,10 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from api.schemas.delivery_partner import DeliveryPartnerCreate, DeliveryPartnerUpdate
-from app.database.models import DeliveryPartner, Location, Shipment, ShipmentStatus
+from app.database.models import DeliveryPartner, Location, Shipment, ShipmentEvent, ShipmentStatus
 from services.user import UserService
-from utils import generate_access_token
-
 
 class DeliveryPartnerService(UserService):
     def __init__(self, session: AsyncSession, tasks=None):
@@ -62,11 +60,15 @@ class DeliveryPartnerService(UserService):
             raise DeliveryPartnerNotAvailable()
 
         for partner in partners:
+            delivered_ids = (
+                select(ShipmentEvent.shipment_id)
+                .where(ShipmentEvent.status == ShipmentStatus.delivered)
+            )
             active_count_stmt = (
                 select(func.count(Shipment.id))
                 .where(
                     Shipment.delivery_partner_id == partner.id,
-                    Shipment.status != ShipmentStatus.delivered,
+                    Shipment.id.not_in(delivered_ids),
                 )
             )
             active_count = await self.session.scalar(active_count_stmt)
