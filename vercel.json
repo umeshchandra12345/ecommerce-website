@@ -1,55 +1,25 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "app/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "includeFiles": ["templates/**"]
-      }
+  "functions": {
+    "app/main.py": {
+      "runtime": "python3.11"
     }
-  ],
+  },
   "rewrites": [
     {
-      "source": "/shipment/:path*",
-      "destination": "/api/shipment/:path*"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/shipment/track(.*)",
-      "dest": "app/main.py"
+      "source": "/api/shipment/track",
+      "destination": "/app/main.py"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "app/main.py"
+      "source": "/api/(.*)",
+      "destination": "/app/main.py"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/frontend/assets/$1"
+      "source": "/shipment/track",
+      "destination": "/app/main.py"
     },
     {
-      "src": "/favicon.svg",
-      "dest": "/frontend/favicon.svg"
-    },
-    {
-      "src": "/icons.svg",
-      "dest": "/frontend/icons.svg"
-    },
-    {
-      "src": "/rider.jpg",
-      "dest": "/frontend/rider.jpg"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/index.html"
+      "source": "/((?!assets/|favicon.svg|icons.svg|rider.jpg).*)",
+      "destination": "/index.html"
     }
   ]
 }
