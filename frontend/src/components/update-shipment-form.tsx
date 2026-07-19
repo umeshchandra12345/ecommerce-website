@@ -71,10 +71,15 @@ export function UpdateShipmentForm({
     })
 
     const updateShipment = async (shipment: FormData) => {
-        const id = shipment.get("id")!.toString()
+        const id = shipment.get("id")?.toString()
         const verificationCode = shipment.get("verification-code")?.toString()
         const location = shipment.get("location")?.toString()
         const description = shipment.get("description")?.toString()
+
+        if (!id) {
+            toast.warning("Please enter a Shipment ID")
+            return
+        }
 
         if (!status && !location && !description) {
             toast.warning("Please provide an update")
