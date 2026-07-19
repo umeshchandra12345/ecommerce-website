@@ -130,6 +130,10 @@ def read_root():
         "message": "welcome to fastship API",
         }
 
+@app.get("/api/v2-force-cache-break")
+def force_cache_break():
+    return {"build_time": "2026-07-19T17:22:00", "v": "2.0"}
+
 ### Scalar API Documentation
 @app.get("/docs", include_in_schema=False)
 def get_scalar_docs():
