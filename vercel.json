@@ -16,11 +16,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "app/main.py"
+      "destination": "/app/main.py"
     },
     {
       "source": "/shipment/(.*)",
-      "destination": "app/main.py"
+      "destination": "/app/main.py"
     }
   ]
 }
