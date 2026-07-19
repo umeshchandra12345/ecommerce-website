@@ -6,8 +6,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from api.tags import APITag
 from app.database.models import TagName
+from jinja2 import Environment, FileSystemLoader
 from utils import TEMPLATE_DIR
 from app.config import app_settings
+
+template_env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 
 from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep, TagServiceDep
@@ -137,12 +140,10 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     
     shipment.created_at.strftime("%d/%m/%Y, %H:%M")
     
-    return templates.TemplateResponse(
-        request=request,
-        name="track.html",
-        context=context
-        
-    )
+    context["request"] = request
+    template = template_env.get_template("track.html")
+    html_content = template.render(**context)
+    return HTMLResponse(content=html_content)
 
 ###Get review form for a shipment
 @router.get("/review")
