@@ -1,25 +1,26 @@
 {
-  "functions": {
-    "app/main.py": {
-      "runtime": "python3.11"
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "app/main.py",
+      "use": "@vercel/python"
     }
-  },
+  ],
   "rewrites": [
     {
-      "source": "/api/shipment/track",
-      "destination": "/app/main.py"
-    },
-    {
       "source": "/api/(.*)",
-      "destination": "/app/main.py"
+      "destination": "app/main.py"
     },
     {
-      "source": "/shipment/track",
-      "destination": "/app/main.py"
-    },
-    {
-      "source": "/((?!assets/|favicon.svg|icons.svg|rider.jpg).*)",
-      "destination": "/index.html"
+      "source": "/shipment/(.*)",
+      "destination": "app/main.py"
     }
   ]
 }
