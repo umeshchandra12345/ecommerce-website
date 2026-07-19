@@ -5,6 +5,8 @@ from fastapi import HTTPException,status
 
 from api.schemas.shipment import ShipmentCreate, ShipmentReview, ShipmentUpdate
 from app.database.models import DeliveryPartner, Review, Seller, Shipment, ShipmentStatus, TagName
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.redis import get_shipment_verification_code
@@ -25,7 +27,17 @@ class ShipmentService(BaseService):
         
     #get a shipment id
     async def get(self, id: UUID) -> Shipment | None:
-        shipment = await self._get(id)
+        stmt = (
+            select(Shipment)
+            .where(Shipment.id == id)
+            .options(
+                selectinload(Shipment.timeline),
+                selectinload(Shipment.delivery_partner),
+                selectinload(Shipment.seller),
+                selectinload(Shipment.tags),
+            )
+        )
+        shipment = await self.session.scalar(stmt)
         if not shipment:
             raise EntityNotFound
         return shipment 

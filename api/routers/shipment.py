@@ -113,6 +113,7 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     status_str = shipment.status.value if hasattr(shipment.status, "value") else str(shipment.status or "")
     context["status"] = status_str
     context["partner"] = shipment.delivery_partner.name if shipment.delivery_partner else "Not Assigned"
+    context["seller"] = shipment.seller.name if shipment.seller else "FastShip Store"
     context["timeline"] = list(reversed(shipment.timeline)) if shipment.timeline else []
     
     if status_str == "out_for_delivery":
