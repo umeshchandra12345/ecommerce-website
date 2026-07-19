@@ -103,11 +103,15 @@ app.add_exception_handler(
 
 @app.middleware("http")   
 async def custom_middleware(request:Request,call_next):
-    # Strip /api prefix if present (useful when deployed on Vercel behind rewrites)
-    if request.scope["path"].startswith("/api"):
-        request.scope["path"] = request.scope["path"][4:]
-        if not request.scope["path"]:
-            request.scope["path"] = "/"
+    # Strip /app/main.py or /api prefix if present (useful when deployed on Vercel behind rewrites)
+    path = request.scope["path"]
+    if path.startswith("/app/main.py"):
+        path = path[12:]
+    if path.startswith("/api"):
+        path = path[4:]
+    if not path:
+        path = "/"
+    request.scope["path"] = path
 
     start = perf_counter()    
     response : Response = await call_next(request)
