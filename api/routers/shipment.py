@@ -517,7 +517,7 @@ TRACK_HTML = """<!DOCTYPE html>
 from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep, TagServiceDep
 from ..schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentReview, ShipmentUpdate, ShipmentTrackResponse
 from core.exceptions import NothingToUpdate
-Jinja2Templates(TEMPLATE_DIR)
+
 # api router to group endpoints
 router = APIRouter(prefix="/shipment", tags=[APITag.SHIPMENT])
 
