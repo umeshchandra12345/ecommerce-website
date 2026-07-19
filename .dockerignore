@@ -1,4 +1,14 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.env
+.venv
+venv
 env
-
-migrations
-alembic.ini
+frontend/node_modules
+frontend/dist
+.pytest_cache
+*.log

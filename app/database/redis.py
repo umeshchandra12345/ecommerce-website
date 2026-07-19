@@ -22,14 +22,13 @@ _shipment_verification_codes =Redis(
 async def add_jti_to_blacklist(jti:str):
     try:
         await _token_blacklist.set(jti,"blacklisted")
-    except RedisError:
+    except Exception:
         logger.exception("Failed to add token to Redis blacklist")
 
 async def is_jti_blacklisted(jti:str)->bool:
     try:
         return bool(await _token_blacklist.exists(jti))
-    except RedisError:
-        logger.exception("Failed to check Redis token blacklist")
+    except Exception:
         return False
     
 _in_memory_verification_codes = {}

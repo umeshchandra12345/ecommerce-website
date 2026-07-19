@@ -33,3 +33,15 @@ async def test_submit_shipment(client: AsyncClient, seller_token: str):
 
     # Check if the shipment is created
     assert response.status_code == 200
+
+
+async def test_seller_shipments_pagination_and_filter(client: AsyncClient, seller_token: str):
+    response = await client.get(
+        "/seller/shipments",
+        params={"page": 1, "limit": 5, "status": "placed"},
+        headers={"Authorization": f"Bearer {seller_token}"},
+    )
+    assert response.status_code == 200
+    assert "x-total-count" in response.headers
+    assert "x-page" in response.headers
+    assert response.headers["x-page"] == "1"
