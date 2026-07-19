@@ -20,7 +20,7 @@
     },
     {
       "src": "/shipment/(.*)",
-      "dest": "app/main.py"
+      "dest": "/api/shipment/$1"
     },
     {
       "src": "/assets/(.*)",
