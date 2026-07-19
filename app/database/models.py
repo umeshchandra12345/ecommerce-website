@@ -120,7 +120,10 @@ class Shipment(SQLModel, table=True):
 
     @property
     def status(self):
-        return self.timeline[-1].status if len(self.timeline) > 0 else None
+        if not self.timeline:
+            return None
+        sorted_timeline = sorted(self.timeline, key=lambda e: e.created_at)
+        return sorted_timeline[-1].status
 
 
 class ShipmentEvent(SQLModel, table=True):
