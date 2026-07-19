@@ -116,13 +116,20 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     context["seller"] = shipment.seller.name if shipment.seller else "FastShip Store"
     context["timeline"] = list(reversed(shipment.timeline)) if shipment.timeline else []
     
-    if status_str == "out_for_delivery":
+    # Generate or retrieve 6-digit OTP when package is out_for_delivery
+    if "out_for_delivery" in status_str.lower():
         from app.database.redis import get_shipment_verification_code, add_shipment_verification_code
         from random import randint
-        code = await get_shipment_verification_code(shipment.id)
+        try:
+            code = await get_shipment_verification_code(shipment.id)
+        except Exception:
+            code = None
         if not code:
             code = str(randint(100_000, 999_999))
-            await add_shipment_verification_code(shipment.id, int(code))
+            try:
+                await add_shipment_verification_code(shipment.id, int(code))
+            except Exception:
+                pass
         context["verification_code"] = str(code)
     else:
         context["verification_code"] = None
