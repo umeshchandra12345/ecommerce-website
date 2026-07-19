@@ -1,6 +1,6 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { ScanQrCode } from "lucide-react"
@@ -48,8 +48,15 @@ export function UpdateShipmentForm({
 
     const queryClient = useQueryClient()
 
+    const [idInput, setIdInput] = useState(shipment?.id || "")
     const [status, setStatus] = useState<ShipmentStatus>()
     const [otp, setOtp] = useState("")
+
+    useEffect(() => {
+        if (shipment?.id) {
+            setIdInput(shipment.id)
+        }
+    }, [shipment?.id])
 
     const shipments = useMutation({
         mutationFn: async ({
@@ -114,13 +121,20 @@ export function UpdateShipmentForm({
                     <div className="flex flex-col gap-6">
                         <div className="flex w-full items-center space-x-2">
                             <Input
-                                value={shipment?.id ?? undefined}
+                                value={idInput}
+                                onChange={(e) => {
+                                    setIdInput(e.target.value)
+                                    onScan(e.target.value)
+                                }}
                                 type="text"
                                 name="id"
                                 required
-                                placeholder="Shipment Id"
+                                placeholder="Shipment Id (e.g. 41eabcaf-...)"
                             />
-                            <QRScanner onScan={onScan}/>
+                            <QRScanner onScan={(scannedId) => {
+                                setIdInput(scannedId)
+                                onScan(scannedId)
+                            }}/>
                         </div>
                         <div className="grid gap-2">
                             <Label>Status</Label>
