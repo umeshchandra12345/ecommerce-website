@@ -24,6 +24,10 @@
   ],
   "routes": [
     {
+      "src": "/shipment/track(.*)",
+      "dest": "app/main.py"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "app/main.py"
     },
