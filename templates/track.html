@@ -44,7 +44,7 @@
 
         .container {
             width: 100%;
-            max-width: 680px;
+            max-width: 720px;
             background-color: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 24px;
@@ -60,16 +60,16 @@
 
         header {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
             letter-spacing: -0.05em;
         }
 
@@ -78,10 +78,153 @@
             color: var(--text-secondary);
         }
 
+        /* Progress Stepper */
+        .stepper-wrapper {
+            margin: 2rem 0;
+            padding: 1.5rem 1rem;
+            background: #f1f5f9;
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .stepper-progress {
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background: #cbd5e1;
+            z-index: 1;
+        }
+
+        .stepper-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            width: 25%;
+        }
+
+        .step-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .step-item.completed .step-icon {
+            background: var(--success);
+            border-color: var(--success);
+            color: #ffffff;
+        }
+
+        .step-item.active .step-icon {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.2);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .step-item.active .step-label,
+        .step-item.completed .step-label {
+            color: var(--text-primary);
+        }
+
+        /* OTP Code Box */
+        .otp-box {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 2px dashed #f59e0b;
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .otp-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #b45309;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .otp-code {
+            font-family: monospace;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 0.35em;
+            color: #92400e;
+            margin: 0.5rem 0;
+        }
+
+        .otp-subtitle {
+            font-size: 0.8rem;
+            color: #78350f;
+        }
+
+        /* Rating Form Box */
+        .rating-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        .star-rating span {
+            color: #cbd5e1;
+            transition: color 0.2s;
+        }
+
+        .star-rating span.selected,
+        .star-rating span:hover {
+            color: #f59e0b;
+        }
+
         .shipment-card {
             border-bottom: 1px solid var(--card-border);
-            padding-bottom: 2rem;
-            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .meta-grid {
@@ -104,7 +247,7 @@
         }
 
         .meta-value {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 500;
         }
 
@@ -258,6 +401,55 @@
             <div class="subtitle">Real-time Shipment Tracking</div>
         </header>
 
+        <!-- Visual Package Stepper -->
+        <div class="stepper-wrapper">
+            <div class="stepper-progress">
+                <div class="stepper-progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="stepper">
+                <div class="step-item" id="step-placed">
+                    <div class="step-icon">📦</div>
+                    <div class="step-label">Placed</div>
+                </div>
+                <div class="step-item" id="step-in_transit">
+                    <div class="step-icon">🚚</div>
+                    <div class="step-label">In Transit</div>
+                </div>
+                <div class="step-item" id="step-out_for_delivery">
+                    <div class="step-icon">🛵</div>
+                    <div class="step-label">Out for Delivery</div>
+                </div>
+                <div class="step-item" id="step-delivered">
+                    <div class="step-icon">✅</div>
+                    <div class="step-label">Delivered</div>
+                </div>
+            </div>
+        </div>
+
+        {% if verification_code %}
+        <!-- OTP Box -->
+        <div class="otp-box">
+            <div class="otp-title">🔐 Delivery Verification PIN</div>
+            <div class="otp-code">{{ verification_code }}</div>
+            <div class="otp-subtitle">Share this 6-digit PIN with your delivery partner to receive your package.</div>
+        </div>
+        {% endif %}
+
+        {% if status == 'delivered' %}
+        <!-- Rating Box -->
+        <div class="rating-box">
+            <h3 style="font-weight: 600; color: #15803d; font-size: 1.1rem;">Rate Your Delivery Experience</h3>
+            <div class="star-rating" id="star-rating">
+                <span onclick="rate(1)">★</span>
+                <span onclick="rate(2)">★</span>
+                <span onclick="rate(3)">★</span>
+                <span onclick="rate(4)">★</span>
+                <span onclick="rate(5)">★</span>
+            </div>
+            <p id="rating-msg" style="font-size: 0.85rem; color: #16a34a; font-weight: 500;"></p>
+        </div>
+        {% endif %}
+
         <section class="shipment-card">
             <div class="meta-grid">
                 <div class="meta-item">
@@ -311,8 +503,45 @@
             {% endif %}
         </section>
     </div>
+
     <footer>
         &copy; 2026 FastShip Courier & Shipment Management System. All rights reserved.
     </footer>
+
+    <script>
+        const status = "{{ status }}";
+        const steps = ["placed", "in_transit", "out_for_delivery", "delivered"];
+        const currentIndex = steps.indexOf(status);
+
+        const progressBar = document.getElementById("progress-bar");
+        if (currentIndex >= 0) {
+            const pct = (currentIndex / (steps.length - 1)) * 100;
+            progressBar.style.width = pct + "%";
+            
+            steps.forEach((step, idx) => {
+                const el = document.getElementById("step-" + step);
+                if (el) {
+                    if (idx < currentIndex) {
+                        el.classList.add("completed");
+                    } else if (idx === currentIndex) {
+                        el.classList.add("active");
+                    }
+                }
+            });
+        }
+
+        function rate(stars) {
+            const container = document.getElementById("star-rating");
+            const spans = container.getElementsByTagName("span");
+            for (let i = 0; i < spans.length; i++) {
+                if (i < stars) {
+                    spans[i].classList.add("selected");
+                } else {
+                    spans[i].classList.remove("selected");
+                }
+            }
+            document.getElementById("rating-msg").innerText = "Thank you for rating " + stars + " stars! ⭐";
+        }
+    </script>
 </body>
 </html>

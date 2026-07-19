@@ -49,6 +49,7 @@ export function UpdateShipmentForm({
     const queryClient = useQueryClient()
 
     const [status, setStatus] = useState<ShipmentStatus>()
+    const [otp, setOtp] = useState("")
 
     const shipments = useMutation({
         mutationFn: async ({
@@ -136,8 +137,8 @@ export function UpdateShipmentForm({
                         </div>
                         {
                             status === "delivered" && <div className="grid gap-2">
-                                <Label htmlFor="verification-code">Verification Code</Label>
-                                <InputOTP maxLength={6} name="verification-code">
+                                <Label htmlFor="verification-code">Verification Code (6-digit OTP)</Label>
+                                <InputOTP maxLength={6} value={otp} onChange={(val) => setOtp(val)}>
                                     <InputOTPGroup>
                                         <InputOTPSlot index={0} />
                                         <InputOTPSlot index={1} />
@@ -150,6 +151,7 @@ export function UpdateShipmentForm({
                                         <InputOTPSlot index={5} />
                                     </InputOTPGroup>
                                 </InputOTP>
+                                <input type="hidden" name="verification-code" value={otp} />
                             </div>
                         }
                         <div className="grid gap-2">

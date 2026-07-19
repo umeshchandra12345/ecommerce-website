@@ -112,8 +112,13 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     context=shipment.model_dump()
     context["status"]=shipment.status
     context["partner"] = shipment.delivery_partner.name if shipment.delivery_partner else "Not Assigned"
-    context["timeline"]=shipment.timeline
-    context["timeline"].reverse()
+    context["timeline"]=list(reversed(shipment.timeline)) if shipment.timeline else []
+    
+    if shipment.status == "out_for_delivery" or shipment.status == ShipmentStatus.out_for_delivery:
+        from app.database.redis import get_shipment_verification_code
+        context["verification_code"] = await get_shipment_verification_code(shipment.id)
+    else:
+        context["verification_code"] = None
     
     
     shipment.created_at.strftime("%d/%m/%Y, %H:%M")

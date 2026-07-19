@@ -1,9 +1,11 @@
-import { Edit3, Package, PackageX } from "lucide-react";
+import { Edit3, Package, PackageX, Printer } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Dialog, DialogTrigger } from "~/components/ui/dialog";
+import { ShippingLabelModal } from "~/components/shipping-label";
 import {
     Table,
     TableBody,
@@ -94,6 +96,15 @@ export default function ShipmentView({ shipment }: { shipment: Shipment }) {
                 </TableBody>
             </Table>
             <div className="flex gap-4 justify-end">
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="gap-2">
+                            <Printer className="size-4" />
+                            Print Shipping Label
+                        </Button>
+                    </DialogTrigger>
+                    <ShippingLabelModal shipment={shipment} />
+                </Dialog>
                 {
                     user === "seller" &&
                     <Button variant="outline">

@@ -32,15 +32,20 @@ async def is_jti_blacklisted(jti:str)->bool:
         logger.exception("Failed to check Redis token blacklist")
         return False
     
+_in_memory_verification_codes = {}
+
 async def add_shipment_verification_code(id:UUID,code:int):
+    _in_memory_verification_codes[str(id)] = str(code)
     try:
         await _shipment_verification_codes.set(str(id),code)
-    except RedisError:
-        logger.exception("Failed to store shipment verification code in Redis")
+    except Exception:
+        pass
     
 async def get_shipment_verification_code(id:UUID):
     try:
-        return str(await _shipment_verification_codes.get(str(id)))
-    except RedisError:
-        logger.exception("Failed to get shipment verification code from Redis")
-        return None
+        val = await _shipment_verification_codes.get(str(id))
+        if val:
+            return str(val)
+    except Exception:
+        pass
+    return _in_memory_verification_codes.get(str(id))
