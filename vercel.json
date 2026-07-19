@@ -19,6 +19,10 @@
       "dest": "app/main.py"
     },
     {
+      "src": "/shipment/(.*)",
+      "dest": "app/main.py"
+    },
+    {
       "src": "/assets/(.*)",
       "dest": "/frontend/assets/$1"
     },
