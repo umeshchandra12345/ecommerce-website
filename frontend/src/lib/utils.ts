@@ -7,7 +7,10 @@ function cn(...inputs: ClassValue[]) {
 }
 
 function getLatestStatus(shipment: Shipment) {
-  return shipment.timeline[shipment.timeline.length - 1].status
+  if (!shipment || !shipment.timeline || shipment.timeline.length === 0) {
+    return "placed";
+  }
+  return shipment.timeline[shipment.timeline.length - 1]?.status || "placed";
 }
 
 function getShipmentsCountWithStatus(

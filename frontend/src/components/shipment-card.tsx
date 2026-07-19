@@ -44,9 +44,10 @@ const statusIcons = {
 }
 
 export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
-    const latestEvent = shipment.timeline[shipment.timeline.length - 1];
-    const latestStatus = latestEvent.status;
-    const statusColor = statusColors[latestStatus];
+    const timeline = shipment.timeline || [];
+    const latestEvent = timeline.length > 0 ? timeline[timeline.length - 1] : null;
+    const latestStatus = (latestEvent?.status || "placed") as keyof typeof statusColors;
+    const statusColor = statusColors[latestStatus] || statusColors.placed;
 
     return (
         <Card className="shadow-none" >
@@ -57,7 +58,7 @@ export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
                     </div>
                     <div>
                         <p className="text-gray-500">Shipment Number</p>
-                        <p className="font-l font-medium">{shipment.id.slice(-10)}</p>
+                        <p className="font-l font-medium">{shipment.id ? shipment.id.slice(-10) : "N/A"}</p>
                     </div>
                 </div>
             </CardHeader>
@@ -66,11 +67,11 @@ export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
                     <div className="absolute left-[80px] top-0 bottom-0 w-0.5 bg-gray-300" />
                     <div data-line className={`absolute left-[80px] top-[24px] bottom-0 w-0.5 ${statusColor.bgColor}`} />
                     <div className="flex flex-col space-y-6 relative">
-                        <TimelineEvent hasOutline={true} event={latestEvent} bgColor={statusColor.bgColor} outlineColor={statusColor.outlineColor} />
+                        {latestEvent && <TimelineEvent hasOutline={true} event={latestEvent} bgColor={statusColor.bgColor} outlineColor={statusColor.outlineColor} />}
                         {
-                            shipment.timeline.length > 1 &&
+                            timeline.length > 1 && timeline[timeline.length - 2] &&
                             <TimelineEvent
-                                event={shipment.timeline[shipment.timeline.length - 2]}
+                                event={timeline[timeline.length - 2]}
                                 bgColor={statusColor.bgColor}
                                 outlineColor={statusColor.bgColor} />
                         }
@@ -79,7 +80,7 @@ export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
             </CardContent>
             <CardFooter>
                 <Dialog>
-                    <DialogTrigger className="w-full">
+                    <DialogTrigger asChild className="w-full">
                         <Button className="w-full">
                             View Details <ChevronRight/>
                         </Button>
@@ -99,15 +100,19 @@ export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
 }
 
 function TimelineEvent({ event, bgColor, outlineColor, hasOutline = false }: { event: ShipmentEvent, bgColor: string, outlineColor: string, hasOutline?: boolean }) {
+    if (!event) return null;
+    const timeStr = event.created_at && event.created_at.includes("T") ? event.created_at.split("T")[1].slice(0, 5) : "--:--";
+    const icon = statusIcons[event.status as keyof typeof statusIcons] || statusIcons.placed;
+
     return (
         <div className="flex items-center gap-x-[15px]">
             <p className="text-xs text-muted-foreground w-[30px]">
-                {event.created_at.split("T")[1].slice(0, 5)}
+                {timeStr}
             </p>
             <div className={`w-[40px] h-[40px] ${bgColor} text-foreground flex items-center justify-center rounded-full ${hasOutline ? `outline-2 ${outlineColor} outline-offset-2` : ''}`}>
-                {statusIcons[event.status]}
+                {icon}
             </div>
-            <p className="text-sm text-gray-800">{event.description}</p>
+            <p className="text-sm text-gray-800">{event.description || "Status updated"}</p>
         </div>
     );
 }
