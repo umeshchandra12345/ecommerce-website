@@ -18,7 +18,7 @@ from app.config import security_settings
 
 from utils import TEMPLATE_DIR, decode_access_token, generate_access_token
 
-from ..dependencies import SellerServiceDep, SessionDep, get_seller_access_token
+from ..dependencies import SellerServiceDep, SessionDep, get_seller_access_token, get_current_seller
 from ..schemas.seller import SellerCreate, SellerRead, TokenResponse
 from services.seller import SellerService
 from core.exceptions import BadCredentials, ClientNotVerified
@@ -32,6 +32,12 @@ async def register_seller(
     service: SellerServiceDep,
 ):
     return await service.add(seller)
+
+@router.get("/shipments")
+async def get_shipments(
+    seller: Annotated[Seller, Depends(get_current_seller)],
+):
+    return seller.shipments
 
 ###login seller
 @router.post("/token", response_model=TokenResponse)

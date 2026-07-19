@@ -1,7 +1,7 @@
 from typing import Annotated, Any
 from pydantic import EmailStr
 from api.tags import APITag
-from app.database.models import Seller
+from app.database.models import DeliveryPartner, Seller
 from app.database.redis import add_jti_to_blacklist
 from fastapi import APIRouter, Depends, HTTPException,status, Request, Form
 from fastapi.responses import HTMLResponse
@@ -13,7 +13,7 @@ from utils import decode_access_token, TEMPLATE_DIR
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 
-from ..dependencies import DeliveryPartnerDep, DeliveryPartnerServiceDep, SessionDep, get_partner_access_token
+from ..dependencies import DeliveryPartnerDep, DeliveryPartnerServiceDep, SessionDep, get_partner_access_token, get_current_partner
 from ..schemas.delivery_partner import DeliveryPartnerCreate, DeliveryPartnerRead, DeliveryPartnerUpdate, TokenResponse
 from services.seller import SellerService
 from core.exceptions import NothingToUpdate
@@ -27,6 +27,12 @@ async def register_delivery_partner(
     service: DeliveryPartnerServiceDep,
 ):
     return await service.add(seller)
+
+@router.get("/shipments")
+async def get_shipments(
+    partner: Annotated[DeliveryPartner, Depends(get_current_partner)],
+):
+    return partner.shipments
 
 ###login delivery partner
 @router.post("/token")
