@@ -58,7 +58,9 @@ class UserService(BaseService):
                     template_name="mail_email.verify.html",
                 )
         except Exception:
-            pass  # Silently skip if Celery/Redis is unavailable
+            # Auto-verify when email service is unavailable (e.g. Vercel serverless)
+            user.email_verified = True
+            await self._update(user)
         
         return user
 
