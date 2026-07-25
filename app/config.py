@@ -32,24 +32,19 @@ class DatabaseSettings(BaseSettings):
         """Return the database URL to use.
         
         If DATABASE_URL or POSTGRES_URL is set in environment, use it directly.
+        Otherwise fallback to SQLite database so serverless deployments without
+        PostgreSQL configured run smoothly.
         """
-        env_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or self.DATABASE_URL
+        env_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or os.getenv("POSTGRES_PRISMA_URL") or self.DATABASE_URL
         if env_url:
             if env_url.startswith("postgres://"):
                 env_url = env_url.replace("postgres://", "postgresql+asyncpg://", 1)
             elif env_url.startswith("postgresql://") and not env_url.startswith("postgresql+"):
                 env_url = env_url.replace("postgresql://", "postgresql+asyncpg://", 1)
             return env_url
-        return str(
-            URL.create(
-                drivername="postgresql+psycopg",
-                username=self.POSTGRES_USER,
-                password=self.POSTGRES_PASSWORD,
-                host=self.POSTGRES_SERVER,
-                port=self.POSTGRES_PORT,
-                database=self.POSTGRES_DB,
-            )
-        )
+        if os.getenv("VERCEL") == "1":
+            return "sqlite+aiosqlite:////tmp/fastship.db"
+        return "sqlite+aiosqlite:///./fastship.db"
     @property
     def POSTGRES_URL(self):
         return f"postgresql+asyncpg://{self.POSTGRES_USER}"
