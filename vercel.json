@@ -21,6 +21,14 @@
     {
       "source": "/shipment/(.*)",
       "destination": "/app/main.py"
+    },
+    {
+      "source": "/(.*\\..*)",
+      "destination": "/frontend/$1"
+    },
+    {
+      "source": "/((?!api|shipment).*)",
+      "destination": "/frontend/index.html"
     }
   ]
 }

@@ -1,0 +1,11 @@
+node-v*
+.venv
+postgres_data
+redis_data
+sqlite.db
+*.log
+.git
+.github
+.pytest_cache
+.mypy_cache
+frontend/node_modules

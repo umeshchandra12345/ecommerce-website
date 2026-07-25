@@ -7,6 +7,7 @@ import { useContext, useState } from "react"
 import { AuthContext, type UserType } from "~/contexts/AuthContext"
 import { toast } from "sonner"
 import api from "~/lib/api"
+import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm({
   className,
@@ -16,6 +17,7 @@ export function LoginForm({
 
   const { login } = useContext(AuthContext)
   const [isSignup, setIsSignup] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -69,7 +71,14 @@ export function LoginForm({
         await login(user, email, password)
       } catch (error: any) {
         console.error("Signup error:", error)
-        toast.error(error?.response?.data?.detail || "Signup failed. Please check the entered data.")
+        const detail = error?.response?.data?.detail
+        let errorMsg = "Signup failed. Please check the entered data."
+        if (typeof detail === "string") {
+          errorMsg = detail
+        } else if (Array.isArray(detail)) {
+          errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ")
+        }
+        toast.error(errorMsg)
       }
     } else {
       await login(user, email, password)
@@ -173,7 +182,23 @@ export function LoginForm({
                     </a>
                   )}
                 </div>
-                <Input id="password" type="password" name="password" required />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer flex items-center justify-center"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <Button type="submit" className="w-full">

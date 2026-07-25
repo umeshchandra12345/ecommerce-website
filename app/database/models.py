@@ -21,7 +21,13 @@ class TagName(str, Enum):
     DOCUMENTS = "documents"
 
     async def tag(self, session: AsyncSession) -> "Tag":
-        return await session.scalar(select(Tag).where(Tag.name == self.value))
+        tag = await session.scalar(select(Tag).where(Tag.name == self.value))
+        if not tag:
+            tag = Tag(name=self, instruction=f"Instruction for {self.value}")
+            session.add(tag)
+            await session.commit()
+            await session.refresh(tag)
+        return tag
 
 
 class ShipmentStatus(str, Enum):
@@ -179,8 +185,8 @@ class Seller(User, table=True):
         )
     )
 
-    address: str
-    zip_code: int
+    address: str = Field(default="")
+    zip_code: int = Field(default=0)
 
     shipments: list[Shipment] = Relationship(
         back_populates="seller",

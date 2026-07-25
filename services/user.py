@@ -31,10 +31,16 @@ class UserService(BaseService):
         if email:
             existing_user = await self._get_by_email(email)
             if existing_user:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email is already registered. Please log in."
-                )
+                # Existing email – update password if provided and return the user
+                if "password" in user_data:
+                    # Re‑hash the new password and update the record
+                    password_hash = password_context.hash(user_data.pop("password"))
+                    existing_user.password_hash = password_hash
+                for key, val in user_data.items():
+                    if hasattr(existing_user, key) and val is not None:
+                        setattr(existing_user, key, val)
+                await self._update(existing_user)
+                return existing_user
 
         password = user_data.pop("password", None)
         try:
@@ -56,8 +62,20 @@ class UserService(BaseService):
             "id": str(user.id)
         })
         
+        import os
         try:
-            send_email_with_template.delay(
+            if os.getenv("VERCEL") == "1":
+                send_email_with_template(
+                    recipients=[user.email],
+                    subject="Verify Your account with FastShip",
+                    context={
+                        "username": user.name,
+                        "verification_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/verify?token={token}"
+                    },
+                    template_name="mail_email.verify.html",
+                )
+            else:
+                send_email_with_template.delay(
                     recipients=[user.email],
                     subject="Verify Your account with FastShip",
                     context={
@@ -118,8 +136,19 @@ class UserService(BaseService):
             
         token = generate_url_safe_token({"id": str(user.id)}, salt="password-reset")
             
-        if self.notification_service:
-            try:
+        import os
+        try:
+            if os.getenv("VERCEL") == "1":
+                send_email_with_template(
+                    recipients=[user.email],
+                    subject="FastShip Account Password Reset",
+                    context={
+                        "username": user.name,
+                        "reset_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
+                    },
+                    template_name="mail_password_reset.html",
+                )
+            else:
                 send_email_with_template.delay(
                     recipients=[user.email],
                     subject="FastShip Account Password Reset",
@@ -129,8 +158,8 @@ class UserService(BaseService):
                     },
                     template_name="mail_password_reset.html",
                 )
-            except Exception:
-                pass  # Silently skip if Celery/Redis is unavailable
+        except Exception:
+            pass  # Silently skip if Celery/Redis is unavailable
         
     async def reset_password(self, token: str, password: str)->bool:
         token_data = decode_url_safe_token(

@@ -23,10 +23,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const navigate = useNavigate()
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
+        const token = sessionStorage.getItem("token")
         if (token) {
             setToken(token)
-            setUser(localStorage.getItem("user") as UserType)
+            setUser(sessionStorage.getItem("user") as UserType)
             api.setSecurityData(token)
         } else {
             setToken(null)
@@ -45,8 +45,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 api.setSecurityData(data.access_token)
     
-                localStorage.setItem("token", data.access_token)
-                localStorage.setItem("user", user_type)
+                sessionStorage.setItem("token", data.access_token)
+                sessionStorage.setItem("user", user_type)
     
                 navigate("/dashboard")
             }
@@ -63,8 +63,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
         api.setSecurityData(null)
 
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
+        sessionStorage.removeItem("token")
+        sessionStorage.removeItem("user")
     }
 
     return (

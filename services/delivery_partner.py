@@ -20,13 +20,15 @@ class DeliveryPartnerService(UserService):
             "partner",
         )
         
+        existing_zip_codes = {loc.zip_code for loc in (partner.servicable_locations or [])}
         for zip_code in partner_create.serviceable_zip_codes:
-            location = await self.session.get(Location, zip_code)
-            partner.servicable_locations.append(
-                location
-                if location
-                else Location(zip_code=zip_code)
-            )
+            if zip_code not in existing_zip_codes:
+                location = await self.session.get(Location, zip_code)
+                partner.servicable_locations.append(
+                    location
+                    if location
+                    else Location(zip_code=zip_code)
+                )
             
         return await self._update(partner)
     
@@ -42,6 +44,25 @@ class DeliveryPartnerService(UserService):
         return await self._generate_token(email, password)
 
     async def update(self, partner: DeliveryPartner) -> DeliveryPartner:
+        return await self._update(partner)
+
+    async def update_partner(self, partner: DeliveryPartner, partner_update: DeliveryPartnerUpdate) -> DeliveryPartner:
+        update_data = partner_update.model_dump(exclude_none=True)
+        if not update_data:
+            return partner
+        
+        zip_codes = update_data.pop("serviceable_zip_codes", None)
+        if zip_codes is not None:
+            partner.servicable_locations.clear()
+            for zip_code in zip_codes:
+                location = await self.session.get(Location, zip_code)
+                if not location:
+                    location = Location(zip_code=zip_code)
+                partner.servicable_locations.append(location)
+                
+        if update_data:
+            partner.sqlmodel_update(update_data)
+            
         return await self._update(partner)
 
     async def assign_shipment(self, destination: int) -> DeliveryPartner:

@@ -68,7 +68,7 @@ class ShipmentEventService(BaseService):
         subject = ""
         template_name = None
         context = {
-            "id": shipment.id,
+            "id": str(shipment.id),
             "seller": shipment.seller.name,
             "partner": shipment.delivery_partner.name if shipment.delivery_partner else "our delivery partner",
             "content": shipment.content,
@@ -79,7 +79,7 @@ class ShipmentEventService(BaseService):
         match status:
             case ShipmentStatus.placed:
                 subject = "Your Order is Shipped 🚚"
-                context["id"]=shipment.id
+                context["id"]=str(shipment.id)
                 context["seller"]=shipment.seller.name
                 context["partner"]=shipment.delivery_partner.name
                 template_name = "mail_placed.html"
@@ -119,11 +119,19 @@ class ShipmentEventService(BaseService):
             return
 
         try:
-            send_email_with_template.delay(
-                recipients=[shipment.client_contact_email],
-                subject=subject,
-                context=context,
-                template_name=template_name,
-            )
+            if os.getenv("VERCEL") == "1":
+                send_email_with_template(
+                    recipients=[shipment.client_contact_email],
+                    subject=subject,
+                    context=context,
+                    template_name=template_name,
+                )
+            else:
+                send_email_with_template.delay(
+                    recipients=[shipment.client_contact_email],
+                    subject=subject,
+                    context=context,
+                    template_name=template_name,
+                )
         except Exception:
             pass  # Celery/Redis unavailable on Vercel

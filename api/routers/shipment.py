@@ -10,6 +10,11 @@ from api.tags import APITag
 from app.database.models import TagName
 from jinja2 import Template
 
+from utils import TEMPLATE_DIR
+from app.config import app_settings
+
+templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
+
 TRACK_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -657,7 +662,7 @@ async def track_html(request: Request, id: UUID, service: ShipmentServiceDep):
 async def get_review_form(request:Request,token:str,):
     return templates.TemplateResponse(
         request=request,
-        name="review.html",
+        name="reviews.html",
         context={
             "request_url":f"http://{app_settings.APP_DOMAIN}/shipment/review?token={token}"
         }

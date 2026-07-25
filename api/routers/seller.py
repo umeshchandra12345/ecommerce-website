@@ -24,7 +24,7 @@ from ..dependencies import SellerServiceDep, SessionDep, get_seller_access_token
 from ..schemas.seller import SellerCreate, SellerRead, TokenResponse
 from ..schemas.shipment import ShipmentRead
 from services.seller import SellerService
-from core.exceptions import BadCredentials, ClientNotVerified
+from core.exceptions import BadCredentials, ClientNotVerified, FastShipError
 
 router = APIRouter(prefix="/seller", tags=[APITag.SELLER])
 
@@ -34,7 +34,14 @@ async def register_seller(
     seller: SellerCreate,
     service: SellerServiceDep,
 ):
-    return await service.add(seller)
+    logging.info(f"Seller signup request payload: {seller}")
+    try:
+        return await service.add(seller)
+    except (HTTPException, FastShipError):
+        raise
+    except Exception as exc:
+        logging.exception("Seller signup failed")
+        raise HTTPException(status_code=400, detail="Signup failed. Please check your input and try again.")
 
 @router.get("/shipments")
 async def get_shipments(
@@ -161,7 +168,7 @@ async def reset_password_submit(
     
     return templates.TemplateResponse(
         request=request,
-        name="password/reset_password_success.html" if is_success else "password/reset_password_failed.html",
+        name="reset_success.html" if is_success else "reset_failed.html",
     )    
 ###logout the seller 
 @router.get("/logout")

@@ -14,3 +14,5 @@ node-v*
 .pytest_cache/
 .mypy_cache/
 *.pkg
+.vercel
+.env*

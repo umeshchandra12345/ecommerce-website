@@ -18,7 +18,13 @@ url = settings.DATABASE_URI
 
 # Create engine
 # Use connect_args={"check_same_thread": False} for SQLite
-connect_args = {"check_same_thread": False} if "sqlite" in url else {}
+connect_args = {}
+if "sqlite" in url:
+    connect_args["check_same_thread"] = False
+else:
+    # Disable prepared statements for PgBouncer / transaction pooling compatibility
+    connect_args["prepare_threshold"] = None
+    connect_args["prepared_statement_cache_size"] = 0
 
 engine = create_async_engine(
     url,

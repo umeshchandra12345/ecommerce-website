@@ -15,12 +15,16 @@ class SellerService(UserService):
     def __init__(self, session: AsyncSession, tasks=None):
         super().__init__(Seller, session)
         
-    async def add(self,seller_create:SellerCreate)->Seller:
-        
+    async def add(self, seller_create: SellerCreate) -> Seller:
+        data = seller_create.model_dump()
+        if data.get("address") is None:
+            data["address"] = ""
+        if data.get("zip_code") is None:
+            data["zip_code"] = 0
         return await self._add_user(
-            seller_create.model_dump(),
+            data,
             "seller"
-            )
+        )
     
     async def authenticate_seller(self, email: str, password: str) -> Seller | None:
         seller = await self._get_by_email(email)

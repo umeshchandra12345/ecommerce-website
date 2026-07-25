@@ -4,9 +4,9 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_SERVER: db
-      REDIS_HOST: redis
-      DATABASE_URL: postgresql+psycopg://postgres:strong@db:5432/fastship
+      POSTGRES_SERVER: ${POSTGRES_SERVER:-db}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://postgres:strong@db:5432/fastship}
     expose:
       - 8000
     command: ["fastapi", "run", "--port", "8000"]
@@ -40,5 +40,5 @@ services:
       - .env
     command: ["celery", "-A", "app.worker.tasks", "worker", "--loglevel=info"]
     environment:
-      REDIS_HOST: redis
-      DATABASE_URL: postgresql+psycopg://postgres:strong@db:5432/fastship
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://postgres:strong@db:5432/fastship}

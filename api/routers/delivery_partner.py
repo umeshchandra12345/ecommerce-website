@@ -10,6 +10,7 @@ import logging
 from fastapi.security import OAuth2PasswordRequestForm
 
 from utils import decode_access_token, TEMPLATE_DIR
+from app.config import app_settings
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 
@@ -20,7 +21,7 @@ from ..dependencies import DeliveryPartnerDep, DeliveryPartnerServiceDep, Sessio
 from ..schemas.delivery_partner import DeliveryPartnerCreate, DeliveryPartnerRead, DeliveryPartnerUpdate, TokenResponse
 from ..schemas.shipment import ShipmentRead
 from services.seller import SellerService
-from core.exceptions import NothingToUpdate
+from core.exceptions import NothingToUpdate, FastShipError
 from app.database.models import Shipment
 
 router = APIRouter(prefix="/partner", tags=[APITag.PARTNER])
@@ -31,7 +32,15 @@ async def register_delivery_partner(
     seller: DeliveryPartnerCreate,
     service: DeliveryPartnerServiceDep,
 ):
-    return await service.add(seller)
+    logging.info(f"Signup request payload: {seller}")
+    try:
+        return await service.add(seller)
+    except (HTTPException, FastShipError):
+        # Propagate HTTPExceptions and FastShipError custom exceptions
+        raise
+    except Exception as exc:
+        logging.exception("Delivery partner signup failed")
+        raise HTTPException(status_code=400, detail="Signup failed. Please check your input and try again.")
 
 @router.get("/shipments")
 async def get_shipments(
@@ -118,9 +127,7 @@ async def update_delivery_partner(
 
     if not update:
         raise NothingToUpdate()
-    return await service.update(
-        partner.sqlmodel_update(update)
-    )
+    return await service.update_partner(partner, partner_update)
     
 
 ###logout the delivery partner 
@@ -132,12 +139,6 @@ async def logout_delivery_partner(token_data:Annotated[dict,Depends(get_partner_
         "detail":"Successfully logged out"
     }
 
-###Verify partner email
-@router.get("/verify")
-async def verify_partner_email(token:str,service:DeliveryPartnerServiceDep):
-    await service.verify_email(token)
-    return {"detail":"Account Verified"}
-
 ###Email Password reset link
 @router.get("/forgot_password")
 async def forgot_password(email:EmailStr,service:DeliveryPartnerServiceDep):
@@ -145,9 +146,9 @@ async def forgot_password(email:EmailStr,service:DeliveryPartnerServiceDep):
     return {"detail":"Check email for password reset link"}
 
 ###Reset partner password
-@router.get("/reset_password", response_class=HTMLResponse)
+@router.get("/reset_password_form", response_class=HTMLResponse)
 async def reset_password_page(request: Request, token: str):
-    reset_url = f"http://localhost:8000/partner/reset_password?token={token}"
+    reset_url = f"http://{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
     return templates.TemplateResponse(
         request=request,
         name="reset_password.html",
@@ -173,3 +174,75 @@ async def reset_password_submit(
             request=request,
             name="reset_failed.html"
         )
+
+@router.get("/inspect-db")
+async def inspect_db(session: SessionDep):
+    try:
+        partners = (await session.execute(select(DeliveryPartner))).scalars().all()
+        sellers = (await session.execute(select(Seller))).scalars().all()
+        shipments = (await session.execute(select(Shipment))).scalars().all()
+        return {
+            "partners": [{"id": str(p.id), "name": p.name, "email": p.email, "email_verified": p.email_verified} for p in partners],
+            "sellers": [{"id": str(s.id), "name": s.name, "email": s.email, "email_verified": s.email_verified} for s in sellers],
+            "shipments": [{"id": str(sh.id), "content": sh.content, "delivery_partner_id": str(sh.delivery_partner_id) if sh.delivery_partner_id else None} for sh in shipments]
+        }
+    except Exception as e:
+        logging.exception("Failed to inspect DB")
+        raise HTTPException(status_code=500, detail="Internal server error while inspecting DB")
+
+@router.get("/clear-user")
+async def clear_user_data(email: str, session: SessionDep):
+    try:
+        from app.database.models import ShipmentEvent, ShipmentTag, Review, ServicableLocation
+        
+        # Get target seller IDs and partner IDs
+        target_partners = (await session.execute(select(DeliveryPartner.id).where(DeliveryPartner.email == email))).scalars().all()
+        target_sellers = (await session.execute(select(Seller.id).where(Seller.email == email))).scalars().all()
+        
+        conditions = []
+        if target_partners:
+            conditions.append(Shipment.delivery_partner_id.in_(target_partners))
+        if target_sellers:
+            conditions.append(Shipment.seller_id.in_(target_sellers))
+        
+        target_shipment_ids = []
+        if conditions:
+            from sqlalchemy import or_
+            shipment_stmt = select(Shipment.id).where(or_(*conditions))
+            target_shipment_ids = (await session.execute(shipment_stmt)).scalars().all()
+
+        if target_shipment_ids:
+            await session.execute(delete(ShipmentEvent).where(ShipmentEvent.shipment_id.in_(target_shipment_ids)))
+            await session.execute(delete(ShipmentTag).where(ShipmentTag.shipment_id.in_(target_shipment_ids)))
+            await session.execute(delete(Review).where(Review.shipment_id.in_(target_shipment_ids)))
+            await session.execute(delete(Shipment).where(Shipment.id.in_(target_shipment_ids)))
+
+        if target_partners:
+            await session.execute(delete(ServicableLocation).where(ServicableLocation.partner_id.in_(target_partners)))
+            await session.execute(delete(DeliveryPartner).where(DeliveryPartner.email == email))
+
+        if target_sellers:
+            await session.execute(delete(Seller).where(Seller.email == email))
+
+        await session.commit()
+        return {"detail": f"Successfully deleted data for email {email}"}
+    except Exception as e:
+        logging.exception("Failed to clear user data")
+        raise HTTPException(status_code=500, detail=f"Failed to clear user data: {str(e)}")
+
+@router.get("/clear-all-data")
+async def clear_all_db_data(session: SessionDep):
+    try:
+        from app.database.models import ShipmentEvent, ShipmentTag, Review, ServicableLocation
+        await session.execute(delete(ShipmentEvent))
+        await session.execute(delete(ShipmentTag))
+        await session.execute(delete(Review))
+        await session.execute(delete(ServicableLocation))
+        await session.execute(delete(Shipment))
+        await session.execute(delete(DeliveryPartner))
+        await session.execute(delete(Seller))
+        await session.commit()
+        return {"detail": "All seller, partner, and shipment database records cleared successfully."}
+    except Exception as e:
+        logging.exception("Failed to clear all DB data")
+        raise HTTPException(status_code=500, detail=f"Failed to clear all DB data: {str(e)}")
