@@ -645,11 +645,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/seller/shipments
      * @secure
      */
-    getShipments: (params: RequestParams = {}) =>
-      this.request<Shipment[], any>({
+    getShipments: (query?: { page?: number; limit?: number; search?: string; status?: string; destination?: number }, params: RequestParams = {}) =>
+      this.request<any, any>({
         path: `/seller/shipments`,
         method: "GET",
         secure: true,
+        query: query,
         format: "json",
         ...params,
       }),
@@ -811,11 +812,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/partner/shipments
      * @secure
      */
-    getShipments: (params: RequestParams = {}) =>
-      this.request<Shipment[], any>({
+    getShipments: (query?: { page?: number; limit?: number; search?: string; status?: string }, params: RequestParams = {}) =>
+      this.request<any, any>({
         path: `/partner/shipments`,
         method: "GET",
         secure: true,
+        query: query,
         format: "json",
         ...params,
       }),
