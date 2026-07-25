@@ -39,6 +39,8 @@ class DatabaseSettings(BaseSettings):
         if env_url:
             if env_url.startswith("postgres://"):
                 env_url = env_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif env_url.startswith("postgresql+psycopg://"):
+                env_url = env_url.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
             elif env_url.startswith("postgresql://") and not env_url.startswith("postgresql+"):
                 env_url = env_url.replace("postgresql://", "postgresql+asyncpg://", 1)
             return env_url

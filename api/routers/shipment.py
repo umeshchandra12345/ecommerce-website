@@ -521,7 +521,7 @@ TRACK_HTML = """<!DOCTYPE html>
 </html>
 """
 
-from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep, TagServiceDep
+from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep, TagServiceDep, CurrentUserDep
 from ..schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentReview, ShipmentUpdate, ShipmentTrackResponse
 from core.exceptions import NothingToUpdate
 
@@ -531,7 +531,7 @@ router = APIRouter(prefix="/shipment", tags=[APITag.SHIPMENT])
 
 ### Read a shipment by id
 @router.get("/", response_model=ShipmentRead)
-async def get_shipment(id: UUID,_:SellerDep, service: ShipmentServiceDep):
+async def get_shipment(id: UUID, _: CurrentUserDep, service: ShipmentServiceDep):
     return await service.get(id)
 
 

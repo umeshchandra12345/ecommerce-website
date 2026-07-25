@@ -76,6 +76,25 @@ def send_email_with_template(
         )
 
 
+async def send_email_with_template_async(
+    recipients: list[EmailStr],
+    subject: str,
+    context: dict,
+    template_name: str,
+):
+    from fastapi_mail import MessageType
+    await fast_mail.send_message(
+        message=MessageSchema(
+            recipients=recipients,
+            subject=subject,
+            template_body=context,
+            subtype=MessageType.html,
+        ),
+        template_name=template_name,
+    )
+
+
+
 
 @app.task
 def send_sms(to:str,body:str):

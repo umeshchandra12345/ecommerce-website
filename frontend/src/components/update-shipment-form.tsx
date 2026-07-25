@@ -124,13 +124,36 @@ export function UpdateShipmentForm({
                                 value={idInput}
                                 onChange={(e) => {
                                     setIdInput(e.target.value)
-                                    onScan(e.target.value)
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault()
+                                        if (idInput.trim()) {
+                                            onScan(idInput.trim())
+                                        }
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    // Wait for the paste value to be applied
+                                    setTimeout(() => {
+                                        const input = e.target as HTMLInputElement
+                                        if (input.value.trim()) {
+                                            onScan(input.value.trim())
+                                        }
+                                    }, 0)
                                 }}
                                 type="text"
                                 name="id"
                                 required
                                 placeholder="Shipment Id (e.g. 41eabcaf-...)"
                             />
+                            <Button variant="outline" type="button" onClick={() => {
+                                if (idInput.trim()) {
+                                    onScan(idInput.trim())
+                                }
+                            }}>
+                                Search
+                            </Button>
                             <QRScanner onScan={(scannedId) => {
                                 setIdInput(scannedId)
                                 onScan(scannedId)

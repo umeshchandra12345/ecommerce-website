@@ -1,16 +1,14 @@
 from httpx import AsyncClient
-from app.tests import example
-from utils import print_label
 
 
 base_url = "/shipment/"
+
 
 async def test_submit_shipment_auth(client: AsyncClient):
     response = await client.post(
         base_url,
         json={},
     )
-    print_label(response.json())
     assert response.status_code == 401
 
 
@@ -18,7 +16,13 @@ async def test_submit_shipment(client: AsyncClient, seller_token: str):
     # Submit Shipment
     response = await client.post(
         base_url,
-        json=example.SHIPMENT,
+        json={
+            "content": "Sample Shipment Item",
+            "weight": 12.5,
+            "destination": 110001,
+            "client_contact_email": "client@example.com",
+            "client_contact_phone": "1234567890",
+        },
         headers={"Authorization": f"Bearer {seller_token}"},
     )
 

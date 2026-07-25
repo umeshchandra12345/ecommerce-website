@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer,HTTPBearer
 
 from utils import decode_access_token
@@ -8,7 +8,7 @@ oauth2_scheme_seller = OAuth2PasswordBearer(tokenUrl="seller/token", scheme_name
 oauth2_scheme_partner = OAuth2PasswordBearer(tokenUrl="partner/token", scheme_name="partner")
 
 class AccessTokenBearer(HTTPBearer):
-    async def __call__(self,request):
+    async def __call__(self, request: Request):
         auth_credentials = await super().__call__(request)
         token = auth_credentials.credentials
         
@@ -20,7 +20,6 @@ class AccessTokenBearer(HTTPBearer):
             raise InvalidToken()
             
         return token_data
-        
-access_token_bearer=AccessTokenBearer()
 
-Annotated[dict,Depends(access_token_bearer)]
+
+access_token_bearer = AccessTokenBearer()

@@ -5,7 +5,7 @@ from fastapi import BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from app.database.models import DeliveryPartner, Seller
 from app.database.redis import is_jti_blacklisted
-from core.security import oauth2_scheme_seller, oauth2_scheme_partner
+from core.security import oauth2_scheme_seller, oauth2_scheme_partner, access_token_bearer
 from app.database.session import SessionDep
 from services.seller import SellerService
 from services.shipment import ShipmentService
@@ -98,6 +98,43 @@ async def get_current_partner(
         _unauthorized("Not Authorized")
 
     return partner
+
+
+async def get_current_user(
+    token_data: Annotated[dict, Depends(access_token_bearer)],
+    session: SessionDep,
+):
+    user_id = _get_user_id(token_data)
+    user = None
+    if user_id:
+        try:
+            user = await session.get(Seller, UUID(user_id))
+        except ValueError:
+            pass
+        if user is None:
+            try:
+                user = await session.get(DeliveryPartner, UUID(user_id))
+            except ValueError:
+                pass
+
+    if user is None and token_data.get("sub"):
+        user = await session.scalar(
+            select(Seller).where(Seller.email == token_data["sub"])
+        )
+        if user is None:
+            user = await session.scalar(
+                select(DeliveryPartner).where(DeliveryPartner.email == token_data["sub"])
+            )
+
+    if user is None:
+        _unauthorized("Not Authorized")
+
+    return user
+
+CurrentUserDep = Annotated[
+    Seller | DeliveryPartner,
+    Depends(get_current_user),
+]
 
 #shipment service dep
 def get_shipment_service(

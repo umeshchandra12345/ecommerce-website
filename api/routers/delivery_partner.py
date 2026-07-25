@@ -152,14 +152,17 @@ async def logout_delivery_partner(token_data:Annotated[dict,Depends(get_partner_
 
 ###Email Password reset link
 @router.get("/forgot_password")
-async def forgot_password(email:EmailStr,service:DeliveryPartnerServiceDep):
-    await service.send_password_reset_link(email,router.prefix)
+async def forgot_password(request: Request, email:EmailStr,service:DeliveryPartnerServiceDep):
+    proto = request.headers.get("x-forwarded-proto", "http")
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host", "localhost:8000")
+    base_url = f"{proto}://{host}"
+    await service.send_password_reset_link(email,router.prefix, base_url)
     return {"detail":"Check email for password reset link"}
 
 ###Reset partner password
 @router.get("/reset_password_form", response_class=HTMLResponse)
 async def reset_password_page(request: Request, token: str):
-    reset_url = f"http://{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
+    reset_url = f"/api{router.prefix}/reset_password?token={token}"
     return templates.TemplateResponse(
         request=request,
         name="reset_password.html",
@@ -175,16 +178,14 @@ async def reset_password_submit(
     password: str = Form(...)
 ):
     try:
-        await service.reset_password(token, password)
-        return templates.TemplateResponse(
-            request=request,
-            name="reset_success.html"
-        )
+        is_success = await service.reset_password(token, password)
     except Exception:
-        return templates.TemplateResponse(
-            request=request,
-            name="reset_failed.html"
-        )
+        is_success = False
+        
+    return templates.TemplateResponse(
+        request=request,
+        name="reset_success.html" if is_success else "reset_failed.html"
+    )
 
 @router.get("/inspect-db")
 async def inspect_db(session: SessionDep):

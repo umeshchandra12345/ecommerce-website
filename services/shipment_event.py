@@ -4,7 +4,7 @@ from random import randint
 
 from app.database.models import Shipment, ShipmentEvent, ShipmentStatus
 from app.database.redis import add_shipment_verification_code
-from app.worker.tasks import send_sms, send_email_with_template
+from app.worker.tasks import send_sms, send_email_with_template, send_email_with_template_async
 from services.base import BaseService
 from utils import generate_url_safe_token
 from app.config import app_settings
@@ -120,7 +120,7 @@ class ShipmentEventService(BaseService):
 
         try:
             if os.getenv("VERCEL") == "1":
-                send_email_with_template(
+                await send_email_with_template_async(
                     recipients=[shipment.client_contact_email],
                     subject=subject,
                     context=context,

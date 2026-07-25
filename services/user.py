@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 
 from app.database.models import User 
 from app.config import app_settings
-from app.worker.tasks import send_email_with_template
+from app.worker.tasks import send_email_with_template, send_email_with_template_async
 from services.notification import NotificationService
 from utils import (
     generate_access_token,
@@ -25,7 +25,7 @@ class UserService(BaseService):
         self.model = model
         self.session = session
         
-    async def _add_user(self, data: dict, router_prefix: str) -> User:
+    async def _add_user(self, data: dict, router_prefix: str, base_url: str = None) -> User:
         user_data = data.copy()
         email = user_data.get("email")
         if email:
@@ -62,15 +62,18 @@ class UserService(BaseService):
             "id": str(user.id)
         })
         
+        if not base_url:
+            base_url = f"http://{app_settings.APP_DOMAIN}"
+            
         import os
         try:
             if os.getenv("VERCEL") == "1":
-                send_email_with_template(
+                await send_email_with_template_async(
                     recipients=[user.email],
                     subject="Verify Your account with FastShip",
                     context={
                         "username": user.name,
-                        "verification_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/verify?token={token}"
+                        "verification_url": f"{base_url}/api{router_prefix}/verify?token={token}"
                     },
                     template_name="mail_email.verify.html",
                 )
@@ -80,7 +83,7 @@ class UserService(BaseService):
                     subject="Verify Your account with FastShip",
                     context={
                         "username": user.name,
-                        "verification_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/verify?token={token}"
+                        "verification_url": f"{base_url}/api{router_prefix}/verify?token={token}"
                     },
                     template_name="mail_email.verify.html",
                 )
@@ -129,22 +132,25 @@ class UserService(BaseService):
             }
         })
         
-    async def send_password_reset_link(self, email: str, router_prefix: str):
+    async def send_password_reset_link(self, email: str, router_prefix: str, base_url: str = None):
         user = await self._get_by_email(email)
         if not user:
             raise EntityNotFound()
             
         token = generate_url_safe_token({"id": str(user.id)}, salt="password-reset")
             
+        if not base_url:
+            base_url = f"http://{app_settings.APP_DOMAIN}"
+            
         import os
         try:
             if os.getenv("VERCEL") == "1":
-                send_email_with_template(
+                await send_email_with_template_async(
                     recipients=[user.email],
                     subject="FastShip Account Password Reset",
                     context={
                         "username": user.name,
-                        "reset_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
+                        "reset_url": f"{base_url}/api{router_prefix}/reset_password_form?token={token}",
                     },
                     template_name="mail_password_reset.html",
                 )
@@ -154,7 +160,7 @@ class UserService(BaseService):
                     subject="FastShip Account Password Reset",
                     context={
                         "username": user.name,
-                        "reset_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
+                        "reset_url": f"{base_url}/api{router_prefix}/reset_password_form?token={token}",
                     },
                     template_name="mail_password_reset.html",
                 )
@@ -172,6 +178,9 @@ class UserService(BaseService):
             return False 
             
         user = await self._get(UUID(token_data["id"]))    
+        if not user:
+            return False
+            
         try:
             if not password:
                 raise ValueError("Password is required")

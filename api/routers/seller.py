@@ -150,8 +150,11 @@ async def verify_seller_email(token:str,service:SellerServiceDep):
 
 ###Email Password reset link
 @router.get("/forgot_password")
-async def forgot_password(email:EmailStr,service:SellerServiceDep):
-    await service.send_password_reset_link(email,router.prefix)
+async def forgot_password(request: Request, email:EmailStr,service:SellerServiceDep):
+    proto = request.headers.get("x-forwarded-proto", "http")
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host", "localhost:8000")
+    base_url = f"{proto}://{host}"
+    await service.send_password_reset_link(email,router.prefix, base_url)
     return {"detail":"Check email for password reset link"}
 
 ###Password reset form
@@ -162,7 +165,7 @@ async def get_reset_password_form(request:Request , token :str):
         request=request,
         name="reset_password.html",
         context={
-            "reset_url": f"http://{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
+            "reset_url": f"/api{router.prefix}/reset_password?token={token}"
         }
     )
 
@@ -173,7 +176,10 @@ async def reset_password_submit(
     request:Request,
     service: SellerServiceDep,
     password: str = Form(...)):
-    is_success= await service.reset_password(token, password)
+    try:
+        is_success = await service.reset_password(token, password)
+    except Exception:
+        is_success = False
     
     templates=Jinja2Templates(TEMPLATE_DIR)
     

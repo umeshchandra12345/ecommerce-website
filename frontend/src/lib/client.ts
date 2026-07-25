@@ -444,6 +444,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/shipment/`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
