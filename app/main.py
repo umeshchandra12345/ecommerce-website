@@ -27,7 +27,10 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 @asynccontextmanager
 async def lifespan_handler(app: FastAPI):
-    await create_db_tables()
+    try:
+        await create_db_tables()
+    except Exception:
+        logger.exception("Database table creation skipped or failed on startup")
     yield
 
 description="""Delivery Management System for sellers and delivery agents

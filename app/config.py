@@ -31,11 +31,15 @@ class DatabaseSettings(BaseSettings):
     def DATABASE_URI(self) -> str:
         """Return the database URL to use.
         
-        If DATABASE_URL is explicitly set, use it directly.
-        Otherwise construct a PostgreSQL URL from individual settings.
+        If DATABASE_URL or POSTGRES_URL is set in environment, use it directly.
         """
-        if self.DATABASE_URL:
-            return self.DATABASE_URL
+        env_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or self.DATABASE_URL
+        if env_url:
+            if env_url.startswith("postgres://"):
+                env_url = env_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif env_url.startswith("postgresql://") and not env_url.startswith("postgresql+"):
+                env_url = env_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return env_url
         return str(
             URL.create(
                 drivername="postgresql+psycopg",
@@ -56,33 +60,32 @@ class DatabaseSettings(BaseSettings):
 
 class SecuritySettings(BaseSettings):
     # Provide safe defaults for local development; override via .env in production
-    JWT_SECRET: str
-    JWT_ALGORITHM: str
+    JWT_SECRET: str = "default_secret_key_fastship_2026"
+    JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 20  # 20 minutes default
 
     model_config = _base_config
     
 class NotificationSettings(BaseSettings):
     
-    MAIL_USERNAME:str
-    MAIL_PASSWORD:str
-    MAIL_FROM:str
-    MAIL_PORT:int
-    MAIL_SERVER:str
-    MAIL_FROM_NAME:str
-    MAIL_STARTTLS:bool=True
-    MAIL_SSL_TLS:bool=False
-    USE_CREDENTIALS:bool=True
-    VALIDATE_CERTS:bool=False
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = ""
+    MAIL_FROM_NAME: str = "FastShip"
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
+    VALIDATE_CERTS: bool = False
     
-    TWILIO_SID: str
-    TWILIO_AUTH_TOKEN: str
-    TWILIO_NUMBER: str
+    TWILIO_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_NUMBER: str = ""
     
     model_config = _base_config
     
 
-    
 settings = DatabaseSettings()
 
 db_settings = settings
