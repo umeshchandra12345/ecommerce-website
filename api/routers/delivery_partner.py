@@ -55,7 +55,18 @@ async def get_shipments(
     stmt = select(Shipment).where(Shipment.delivery_partner_id == partner.id)
 
     if status:
-        stmt = stmt.where(Shipment.status == status)
+        from app.database.models import ShipmentEvent
+        subq = (
+            select(ShipmentEvent.shipment_id, func.max(ShipmentEvent.created_at).label("max_created"))
+            .group_by(ShipmentEvent.shipment_id)
+            .subquery()
+        )
+        latest_event = (
+            select(ShipmentEvent.shipment_id)
+            .join(subq, (ShipmentEvent.shipment_id == subq.c.shipment_id) & (ShipmentEvent.created_at == subq.c.max_created))
+            .where(ShipmentEvent.status == status)
+        )
+        stmt = stmt.where(Shipment.id.in_(latest_event))
     if search:
         search_pattern = f"%{search}%"
         stmt = stmt.where(

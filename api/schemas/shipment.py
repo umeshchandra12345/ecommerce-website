@@ -1,11 +1,13 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from uuid import UUID
 
 from app.database.models import ShipmentEvent, ShipmentStatus, Tag
 
 
 class BaseShipment(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     content: str = Field(max_length=100)
     weight: float = Field(le=25)
     destination: int = Field(
