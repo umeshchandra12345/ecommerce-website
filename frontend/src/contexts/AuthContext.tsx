@@ -80,8 +80,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     
                 navigate("/dashboard")
             }
-        } catch (error) {
-            toast.error("Login failed. Please check your credentials.")
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail
+            const errorMsg = typeof detail === "string" ? detail : "Login failed. Please check your credentials."
+            toast.error(errorMsg)
+            throw error
         }
     }
 

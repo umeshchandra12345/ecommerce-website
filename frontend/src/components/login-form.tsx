@@ -67,18 +67,20 @@ export function LoginForm({
           })
         }
 
-        toast.success("Signup successful! Logging you in...")
         await login(user, email, password)
+        toast.success("Signup successful! Welcome to FastShip.")
       } catch (error: any) {
         console.error("Signup error:", error)
         const detail = error?.response?.data?.detail
-        let errorMsg = "Signup failed. Please check the entered data."
-        if (typeof detail === "string") {
-          errorMsg = detail
-        } else if (Array.isArray(detail)) {
-          errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ")
+        if (detail) {
+          let errorMsg = "Signup failed. Please check the entered data."
+          if (typeof detail === "string") {
+            errorMsg = detail
+          } else if (Array.isArray(detail)) {
+            errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ")
+          }
+          toast.error(errorMsg)
         }
-        toast.error(errorMsg)
       }
     } else {
       await login(user, email, password)
