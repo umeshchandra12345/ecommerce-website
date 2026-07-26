@@ -19,6 +19,10 @@
       "destination": "/app/main.py"
     },
     {
+      "source": "/shipment/(.*)",
+      "destination": "/app/main.py"
+    },
+    {
       "source": "/docs",
       "destination": "/app/main.py"
     },
@@ -31,7 +35,7 @@
       "destination": "/frontend/$1"
     },
     {
-      "source": "/((?!api|docs|openapi).*)",
+      "source": "/((?!api|shipment|docs|openapi).*)",
       "destination": "/frontend/index.html"
     }
   ]
