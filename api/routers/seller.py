@@ -41,7 +41,7 @@ async def register_seller(
         raise
     except Exception as exc:
         logging.exception("Seller signup failed")
-        raise HTTPException(status_code=400, detail="Signup failed. Please check your input and try again.")
+        raise HTTPException(status_code=400, detail=str(exc) or "Signup failed. Please check your input and try again.")
 
 @router.get("/shipments")
 async def get_shipments(
