@@ -13,25 +13,26 @@
       "use": "@vercel/python"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "app/main.py"
+      "source": "/api/(.*)",
+      "destination": "/app/main.py"
     },
     {
-      "src": "/docs",
-      "dest": "app/main.py"
+      "source": "/docs",
+      "destination": "/app/main.py"
     },
     {
-      "src": "/openapi.json",
-      "dest": "app/main.py"
+      "source": "/openapi.json",
+      "destination": "/app/main.py"
     },
     {
-      "handle": "filesystem"
+      "source": "/(.*\\..*)",
+      "destination": "/frontend/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!api|docs|openapi).*)",
+      "destination": "/frontend/index.html"
     }
   ]
 }
