@@ -66,7 +66,7 @@ class DatabaseSettings(BaseSettings):
 
 class SecuritySettings(BaseSettings):
     # Provide safe defaults for local development; override via .env in production
-    JWT_SECRET: str = "default_secret_key_fastship_2026"
+    JWT_SECRET: str = "very-strong-secret-key-that-is-at-least-32-bytes-long"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 20  # 20 minutes default
 
