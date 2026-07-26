@@ -521,8 +521,8 @@ TRACK_HTML = """<!DOCTYPE html>
 </html>
 """
 
-from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep, TagServiceDep, CurrentUserDep
-from ..schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentReview, ShipmentUpdate, ShipmentTrackResponse
+from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep, TagServiceDep, CurrentUserDep, SessionDep
+from ..schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentReview, ShipmentUpdate, ShipmentTrackResponse, OTPVerifyRequest, OTPVerifyResponse
 from core.exceptions import NothingToUpdate
 
 # api router to group endpoints
@@ -574,6 +574,36 @@ async def update_shipment(
         raise NothingToUpdate()
         
     return await service.update(id,shipment_update,partner)
+
+
+### Verify Delivery OTP
+@router.post("/verify-otp", response_model=OTPVerifyResponse)
+async def verify_delivery_otp(
+    payload: OTPVerifyRequest,
+    partner: DeliveryPartnerDep,
+    service: ShipmentServiceDep,
+    session: SessionDep,
+):
+    from services.otp import OTPService
+    from datetime import datetime, timezone
+    from app.database.models import ShipmentStatus
+
+    otp_service = OTPService(session)
+    await otp_service.verify_otp(shipment_id=payload.shipment_id, entered_otp=payload.otp)
+
+    # Transition shipment status to delivered
+    updated_shipment = await service.update(
+        id=payload.shipment_id,
+        shipment_update=ShipmentUpdate(status=ShipmentStatus.delivered, verification_code=payload.otp),
+        partner=partner,
+    )
+
+    return OTPVerifyResponse(
+        detail="Delivery verified successfully",
+        shipment_id=updated_shipment.id,
+        status=ShipmentStatus.delivered,
+        delivered_at=datetime.now(timezone.utc),
+    )
 
 ###Add a tag to a shipment
 @router.get("/tag",response_model=ShipmentRead)

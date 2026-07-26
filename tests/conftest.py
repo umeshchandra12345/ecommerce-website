@@ -58,7 +58,7 @@ async def setup_and_teardown():
     app.dependency_overrides[get_session] = get_session_override
 
     async with engine.begin() as connection:
-        from app.database.models import DeliveryPartner, Seller, Shipment  # noqa: F401
+        from app.database.models import DeliveryPartner, Seller, Shipment, DeliveryOTP  # noqa: F401
         await connection.run_sync(SQLModel.metadata.create_all)
 
     async with test_session() as session:

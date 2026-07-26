@@ -68,3 +68,15 @@ class ShipmentTrackResponse(BaseModel):
 class ShipmentReview(BaseModel):
     rating:int=Field(ge=1, le=5)
     comment :str | None = Field(default=None)
+
+
+class OTPVerifyRequest(BaseModel):
+    shipment_id: UUID
+    otp: str = Field(min_length=6, max_length=6, description="6-digit OTP verification code")
+
+
+class OTPVerifyResponse(BaseModel):
+    detail: str = "Delivery verified successfully"
+    shipment_id: UUID
+    status: ShipmentStatus = ShipmentStatus.delivered
+    delivered_at: datetime

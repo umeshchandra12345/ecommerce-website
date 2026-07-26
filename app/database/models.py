@@ -301,3 +301,30 @@ class Review(SQLModel, table=True):
         back_populates="review",
         sa_relationship_kwargs={"lazy": "selectin"},
     )
+
+
+class DeliveryOTP(SQLModel, table=True):
+    __tablename__ = "delivery_otp"
+
+    id: UUID = Field(
+        sa_column=Column(
+            postgresql.UUID,
+            default=uuid4,
+            primary_key=True,
+        )
+    )
+    shipment_id: UUID = Field(foreign_key="shipment.id", unique=True, index=True)
+    otp_code: str
+    created_at: datetime = Field(
+        sa_column=Column(
+            postgresql.TIMESTAMP,
+            default=datetime.now,
+        )
+    )
+    expires_at: datetime = Field(
+        sa_column=Column(
+            postgresql.TIMESTAMP,
+        )
+    )
+    attempts: int = Field(default=0)
+    is_used: bool = Field(default=False)

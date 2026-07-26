@@ -77,10 +77,15 @@ class ShipmentService(BaseService):
         
         
         if shipment_update.status == ShipmentStatus.delivered or shipment_update.status == "delivered":
-            code = await get_shipment_verification_code(shipment.id)
-            if code and str(code).strip() != str(shipment_update.verification_code or "").strip():
-                raise ClientNotAuthorized()
-                
+            from services.otp import OTPService
+            otp_service = OTPService(self.session)
+            otp_record = await otp_service.repo.get_by_shipment_id(shipment.id)
+            if otp_record and not otp_record.is_used:
+                await otp_service.verify_otp(
+                    shipment_id=shipment.id,
+                    entered_otp=str(shipment_update.verification_code or "").strip()
+                )
+
         update = shipment_update.model_dump(exclude_none=True,exclude=["verification_code"],)
             
         # Flag to check if a shipment event needs to be created

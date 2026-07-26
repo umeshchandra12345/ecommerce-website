@@ -62,6 +62,36 @@ class PasswordRequired(FastShipError):
     status = status.HTTP_400_BAD_REQUEST
 
 
+class InvalidOTP(FastShipError):
+    """Invalid OTP code provided"""
+
+    status = status.HTTP_400_BAD_REQUEST
+
+
+class OTPExpired(FastShipError):
+    """OTP code has expired. Please request a new code."""
+
+    status = status.HTTP_400_BAD_REQUEST
+
+
+class OTPAlreadyUsed(FastShipError):
+    """OTP code has already been used for delivery verification"""
+
+    status = status.HTTP_400_BAD_REQUEST
+
+
+class ShipmentNotOutForDelivery(FastShipError):
+    """Shipment must be in OUT_FOR_DELIVERY status before verifying delivery"""
+
+    status = status.HTTP_400_BAD_REQUEST
+
+
+class OTPTooManyAttempts(FastShipError):
+    """Too many failed OTP verification attempts. Please generate a new code."""
+
+    status = status.HTTP_429_TOO_MANY_REQUESTS
+
+
 
 def _get_handler(status: int, detail: str):
     # Define

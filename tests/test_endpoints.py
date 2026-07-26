@@ -211,9 +211,9 @@ async def test_shipment_full_flow(client: AsyncClient, seller_token: str):
     otp_code = await get_shipment_verification_code(UUID(shipment_id))
     assert otp_code is not None
 
-    # 6b. Update Shipment Status to delivered WITHOUT OTP -> should fail (401 ClientNotAuthorized)
+    # 6b. Update Shipment Status to delivered WITHOUT OTP -> should fail (400 InvalidOTP)
     fail_delivery = await client.patch("/shipment/", params={"id": shipment_id}, json={"status": "delivered", "verification_code": "000000"}, headers=partner_headers)
-    assert fail_delivery.status_code == 401
+    assert fail_delivery.status_code == 400
 
     # 6c. Update Shipment Status to delivered WITH correct OTP -> should succeed (200)
     success_delivery = await client.patch("/shipment/", params={"id": shipment_id}, json={"status": "delivered", "verification_code": str(otp_code)}, headers=partner_headers)

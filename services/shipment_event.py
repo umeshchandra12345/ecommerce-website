@@ -1,3 +1,4 @@
+import os
 from fastapi import BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from random import randint
@@ -73,7 +74,8 @@ class ShipmentEventService(BaseService):
             "partner": shipment.delivery_partner.name if shipment.delivery_partner else "our delivery partner",
             "content": shipment.content,
             "destination": shipment.destination,
-            "estimated_delivery": shipment.estimated_delivery.strftime("%B %d, %Y") if shipment.estimated_delivery else "TBD"
+            "estimated_delivery": shipment.estimated_delivery.strftime("%B %d, %Y") if shipment.estimated_delivery else "TBD",
+            "app_domain": app_settings.APP_DOMAIN,
         }
 
         match status:
@@ -88,22 +90,10 @@ class ShipmentEventService(BaseService):
                 subject = "Your Order is Arriving soon🚚"
                 template_name = "mail_out_for_delivery.html"
                 
-                code=randint(100_000 , 999_999)
-                try:
-                    await add_shipment_verification_code(shipment.id,code)
-                except Exception:
-                    pass  # Redis unavailable on Vercel
-                
-                context["verification_code"]=code
-                if shipment.client_contact_phone:
-                    try:
-                        send_sms.delay(
-                            to=shipment.client_contact_phone,
-                            body=f"Your order is arriving soon! Share the {code} code with your "
-                            "delivery executive to receive your package"
-                        )
-                    except Exception:
-                        pass  # Celery/Redis unavailable on Vercel
+                from services.otp import OTPService
+                otp_service = OTPService(self.session)
+                code = await otp_service.generate_and_send_otp(shipment, ttl_minutes=10)
+                context["verification_code"] = code
             case ShipmentStatus.delivered:
                 subject = "Your Order is Delivered✅"
                 context["seller"]= shipment.seller.name

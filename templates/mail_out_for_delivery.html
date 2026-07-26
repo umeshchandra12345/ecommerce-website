@@ -7,7 +7,7 @@
 {% if verification_code%}
 <p>Share {{verification_code}} with delivery executive to recieve your package.</p>
 {% endif %}
-<a href="http://localhost:8000/shipment/track?id={{ id }}"
+<a href="https://{{ app_domain if app_domain else 'udmbackend.vercel.app' }}/api/shipment/track?id={{ id }}"
 style="background:#2563eb;color:white;padding:10px 16px;
 text-decoration:none;border-radius:5px;"
 >Track Now</a>

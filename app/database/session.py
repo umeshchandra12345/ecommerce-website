@@ -47,7 +47,7 @@ async def create_db_tables():
     import traceback
     try:
         async with engine.begin() as connection:
-            from app.database.models import Shipment , Seller
+            from app.database.models import Shipment, Seller, DeliveryOTP
             await connection.run_sync(SQLModel.metadata.create_all)
     except Exception:
         print("\n===== FULL DB ERROR =====")
