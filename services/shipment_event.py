@@ -99,9 +99,9 @@ class ShipmentEventService(BaseService):
                 context["verification_code"] = code
             case ShipmentStatus.delivered:
                 subject = "Your Order is Delivered✅"
-                context["seller"] = seller_name
-                token=generate_url_safe_token({"id":str(shipment.id)})
-                context["review_url"]=f"http://{app_settings.APP_DOMAIN}/shipment/review?token={token}"
+                token = generate_url_safe_token({"id": str(shipment.id)})
+                protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
+                context["review_url"] = f"{protocol}://{app_settings.APP_DOMAIN}/shipment/review?id={shipment.id}&token={token}"
                 template_name = "mail_delivered.html"
 
             case ShipmentStatus.cancelled:
