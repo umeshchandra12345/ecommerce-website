@@ -38,6 +38,35 @@ const statusValues = [
     ShipmentStatus.Delivered,
 ]
 
+const suggestionsByStatus: Record<string, string[]> = {
+    in_transit: [
+        "Arrived at sorting facility hub",
+        "Scanned at warehouse & dispatched",
+        "In transit to destination city",
+        "Package processed at transit hub",
+    ],
+    out_for_delivery: [
+        "Out for delivery with courier agent",
+        "Arrived at local doorstep facility",
+        "Agent en route to customer address",
+    ],
+    delivered: [
+        "Handed over to customer with OTP verification",
+        "Delivered safely at doorstep",
+        "Received by authorized recipient",
+    ],
+    cancelled: [
+        "Delivery cancelled per customer request",
+        "Address unlocatable / incorrect pincode",
+    ],
+}
+const defaultSuggestions = [
+    "Arrived at sorting facility hub",
+    "Out for delivery with courier agent",
+    "Handed over to customer with OTP verification",
+    "Scanned & processed at sorting facility",
+]
+
 export function UpdateShipmentForm({
     className,
     onScan,
@@ -50,6 +79,7 @@ export function UpdateShipmentForm({
     const [idInput, setIdInput] = useState(shipment?.id || "")
     const [status, setStatus] = useState<ShipmentStatus>()
     const [otp, setOtp] = useState("")
+    const [description, setDescription] = useState("")
 
     useEffect(() => {
         if (shipment?.id) {
@@ -247,11 +277,16 @@ export function UpdateShipmentForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-slate-500">Scan Remarks / Note</Label>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-slate-500">Scan Remarks / Note</Label>
+                                <span className="text-[10px] font-bold text-[#FF6B4A]">Click chip to auto-fill</span>
+                            </div>
                             <Input
                                 id="description"
                                 name="description"
                                 type="text"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
                                 placeholder={
                                     latestEvent?.description
                                         ? latestEvent.description
@@ -259,6 +294,24 @@ export function UpdateShipmentForm({
                                 }
                                 className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
                             />
+
+                            {/* Quick Suggestion Chips */}
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                                {(status && suggestionsByStatus[status] ? suggestionsByStatus[status] : defaultSuggestions).map((item, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => setDescription(item)}
+                                        className={`text-[11px] font-medium px-3 py-1 rounded-full border transition-all cursor-pointer ${
+                                            description === item
+                                                ? "bg-[#FF6B4A] text-white border-[#FF6B4A] shadow-xs font-bold"
+                                                : "bg-[#FFEFE8]/70 text-slate-700 border-[#FF6B4A]/20 hover:bg-[#FF6B4A] hover:text-white"
+                                        }`}
+                                    >
+                                        + {item}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <button
