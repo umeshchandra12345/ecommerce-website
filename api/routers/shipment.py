@@ -711,13 +711,27 @@ async def get_review_form(request: Request, token: str, service: ShipmentService
 @router.post("/review")
 async def submit_review(
     request: Request,
-    token: str,
-    rating: Annotated[int, Form(ge=1, le=5)],
     service: ShipmentServiceDep,
+    token: Annotated[str | None, Form()] = None,
+    rating: Annotated[int | None, Form()] = 5,
     comment: Annotated[str | None, Form()] = None,
 ):
+    actual_token = token or request.query_params.get("token")
+    if not actual_token:
+        if "application/json" in request.headers.get("accept", ""):
+            raise HTTPException(status_code=400, detail="Token is required")
+        return templates.TemplateResponse(
+            request=request,
+            name="review_failed.html",
+            context={
+                "message": "Missing review verification token. Please use the review link provided in your delivery email."
+            }
+        )
+
+    actual_rating = rating if (rating is not None and 1 <= rating <= 5) else 5
+
     try:
-        await service.rate(token, ShipmentReview(rating=rating, comment=comment))
+        await service.rate(actual_token, ShipmentReview(rating=actual_rating, comment=comment))
     except Exception as exc:
         logging.exception("Failed to submit review")
         if "application/json" in request.headers.get("accept", ""):
@@ -737,7 +751,7 @@ async def submit_review(
         request=request,
         name="review_submitted.html",
         context={
-            "rating": rating,
+            "rating": actual_rating,
             "comment": comment or "",
         }
     )
