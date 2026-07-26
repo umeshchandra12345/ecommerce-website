@@ -46,7 +46,7 @@ class ShipmentService(BaseService):
     async def add(self, shipment_create: ShipmentCreate, seller: Seller) -> Shipment:
         shipment = Shipment(
             **shipment_create.model_dump(),
-            estimated_delivery=datetime.now(timezone.utc) + timedelta(days=3),
+            estimated_delivery=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=3),
             seller_id=seller.id,
         )
         partner = await self.partner_service.assign_shipment(shipment.destination)
