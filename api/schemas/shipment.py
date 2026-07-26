@@ -24,11 +24,11 @@ class BaseShipment(BaseModel):
         return v
 
 
-class  ShipmentRead(BaseShipment):
+class ShipmentRead(BaseShipment):
     id: UUID
     timeline: list[ShipmentEvent]
-    estimated_delivery: datetime
-    tags:list[Tag]
+    estimated_delivery: datetime | None = None
+    tags: list[Tag]
 
 
 class ShipmentCreate(BaseShipment):
