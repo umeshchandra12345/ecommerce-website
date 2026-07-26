@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Submitted | FastShip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #f8fafc;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+            text-decoration: none;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .icon-box {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            background: rgba(234, 179, 8, 0.15);
+            border: 2px solid rgba(234, 179, 8, 0.4);
+            color: #facc15;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.2);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        p {
+            font-size: 15px;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .stars-display {
+            font-size: 28px;
+            color: #facc15;
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+        }
+
+        .review-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+            text-align: left;
+        }
+
+        .review-card .label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #818cf8;
+            margin-bottom: 6px;
+        }
+
+        .review-card .comment {
+            font-size: 14px;
+            color: #e2e8f0;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.6);
+        }
+
+        .footer {
+            margin-top: 32px;
+            font-size: 13px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="/" class="logo">🚚 <span>FastShip</span></a>
+
+        <div class="icon-box">⭐</div>
+        <h1>Thank You for Your Review!</h1>
+        <p>Your valuable feedback has been submitted successfully and helps us continuously improve FastShip's delivery service.</p>
+
+        <div class="stars-display">
+            {% for i in range(rating | int) %}★{% endfor %}
+            {% for i in range(5 - (rating | int)) %}<span style="color: rgba(255,255,255,0.2);">★</span>{% endfor %}
+        </div>
+
+        {% if comment %}
+        <div class="review-card">
+            <div class="label">Your Feedback</div>
+            <div class="comment">"{{ comment }}"</div>
+        </div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="/" class="btn btn-primary">Return to Home</a>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 FastShip Logistics. All rights reserved.
+        </div>
+    </div>
+
+</body>
+</html>

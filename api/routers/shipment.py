@@ -1,5 +1,6 @@
 from typing import Annotated
 from uuid import UUID
+import os
 
 __version__ = "1.0.1"
 
@@ -681,22 +682,36 @@ async def track_html(request: Request, id: UUID, service: ShipmentServiceDep, se
 
 ###Get review form for a shipment
 @router.get("/review")
-async def get_review_form(request:Request,token:str,):
+async def get_review_form(request: Request, token: str):
+    protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
+    base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
     return templates.TemplateResponse(
         request=request,
         name="reviews.html",
         context={
-            "request_url":f"http://{app_settings.APP_DOMAIN}/shipment/review?token={token}"
+            "request_url": f"{base_url}/api/shipment/review?token={token}"
         }
     )
 
 ###Submit a review for a shipment
 @router.post("/review")
 async def submit_review(
-    token:str,
-    rating:Annotated[int,Form(ge=1,le=5)],
-    comment:Annotated[str | None,Form()],
-    service:ShipmentServiceDep,
+    request: Request,
+    token: str,
+    rating: Annotated[int, Form(ge=1, le=5)],
+    service: ShipmentServiceDep,
+    comment: Annotated[str | None, Form()] = None,
 ):
     await service.rate(token, ShipmentReview(rating=rating, comment=comment))
-    return {"detail": "Review Submitted"}
+
+    if "application/json" in request.headers.get("accept", ""):
+        return {"detail": "Review Submitted"}
+
+    return templates.TemplateResponse(
+        request=request,
+        name="review_submitted.html",
+        context={
+            "rating": rating,
+            "comment": comment or "",
+        }
+    )

@@ -243,6 +243,6 @@ async def test_shipment_full_flow(client: AsyncClient, seller_token: str):
     assert response.status_code == 200
 
     # POST Submit Review
-    response = await client.post("/shipment/review", params={"token": review_token}, data={"rating": 5, "comment": "Excellent service!"})
+    response = await client.post("/shipment/review", params={"token": review_token}, data={"rating": 5, "comment": "Excellent service!"}, headers={"Accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["detail"] == "Review Submitted"
