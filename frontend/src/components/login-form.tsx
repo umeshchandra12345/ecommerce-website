@@ -221,7 +221,7 @@ export function LoginForm({
               </div>
 
               <Button type="submit" className="w-full h-12 bg-gradient-to-r from-[#FF6B4A] to-[#FF8C68] hover:from-[#E05536] hover:to-[#FF6B4A] text-white font-bold rounded-full shadow-lg shadow-orange-500/20 border-0 transition-all mt-2 uppercase tracking-wider text-xs">
-                {isSignup ? "CREATE ACCOUNT →" : "SING IN →"}
+                {isSignup ? "CREATE ACCOUNT →" : "SIGN IN →"}
               </Button>
 
               <div className="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">
