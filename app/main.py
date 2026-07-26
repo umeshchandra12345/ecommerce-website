@@ -98,6 +98,7 @@ app.add_middleware(
 
 add_exception_handlers(app)
 app.include_router(master_router)
+app.include_router(master_router, prefix="/api")
 
 
 def handler(request,exception):
