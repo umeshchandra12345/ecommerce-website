@@ -7,7 +7,7 @@ import { useContext, useState } from "react"
 import { AuthContext, type UserType } from "~/contexts/AuthContext"
 import { toast } from "sonner"
 import api from "~/lib/api"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Truck } from "lucide-react"
 
 export function LoginForm({
   className,
@@ -89,59 +89,68 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden p-0 border border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl rounded-2xl">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8" onSubmit={handleSubmit}>
+          <form className="p-6 md:p-10 flex flex-col justify-center" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">{isSignup ? "Create an account" : "Welcome back"}</h1>
-                <p className="text-muted-foreground text-balance">
-                  {isSignup ? `Register as a new FastShip ${user}` : `Login to your FastShip ${user} account`}
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3">
+                  <Truck className="w-6 h-6" />
+                </div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">
+                  {isSignup ? `Join FastShip as ${user === "seller" ? "Seller" : "Partner"}` : `Welcome Back`}
+                </h1>
+                <p className="text-slate-400 text-sm mt-1">
+                  {isSignup ? `Create your ${user} account to get started` : `Login to your FastShip ${user} portal`}
                 </p>
               </div>
 
               {isSignup && (
-                <div className="grid gap-3">
-                  <Label htmlFor="name">Full Name</Label>
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Full Name</Label>
                   <Input
                     id="name"
                     type="text"
                     name="name"
                     placeholder="John Doe"
                     required
+                    className="bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-600 focus:border-indigo-500 rounded-xl"
                   />
                 </div>
               )}
 
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
                   name="email"
                   placeholder="m@example.com"
                   required
+                  className="bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-600 focus:border-indigo-500 rounded-xl"
                 />
               </div>
 
               {isSignup && user === "seller" && (
                 <>
-                  <div className="grid gap-3">
-                    <Label htmlFor="address">Address</Label>
+                  <div className="grid gap-2">
+                    <Label htmlFor="address" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Address</Label>
                     <Input
                       id="address"
                       type="text"
                       name="address"
-                      placeholder="123 Street Address"
+                      placeholder="123 Commerce St"
+                      className="bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-600 focus:border-indigo-500 rounded-xl"
                     />
                   </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="zip_code">Zip Code</Label>
+                  <div className="grid gap-2">
+                    <Label htmlFor="zip_code" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Zip Code</Label>
                     <Input
                       id="zip_code"
                       type="number"
                       name="zip_code"
                       placeholder="110001"
+                      className="bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-600 focus:border-indigo-500 rounded-xl"
                     />
                   </div>
                 </>
@@ -149,38 +158,40 @@ export function LoginForm({
 
               {isSignup && user === "partner" && (
                 <>
-                  <div className="grid gap-3">
-                    <Label htmlFor="serviceable_zip_codes">Serviceable Zip Codes (comma-separated)</Label>
+                  <div className="grid gap-2">
+                    <Label htmlFor="serviceable_zip_codes" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Serviceable Zip Codes (comma-separated)</Label>
                     <Input
                       id="serviceable_zip_codes"
                       type="text"
                       name="serviceable_zip_codes"
                       placeholder="110001, 110002"
                       required
+                      className="bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-600 focus:border-indigo-500 rounded-xl"
                     />
                   </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="max_handling_capacity">Max Handling Capacity</Label>
+                  <div className="grid gap-2">
+                    <Label htmlFor="max_handling_capacity" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Max Handling Capacity</Label>
                     <Input
                       id="max_handling_capacity"
                       type="number"
                       name="max_handling_capacity"
                       defaultValue="5"
                       required
+                      className="bg-slate-950/60 border-slate-800 text-white placeholder:text-slate-600 focus:border-indigo-500 rounded-xl"
                     />
                   </div>
                 </>
               )}
 
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Password</Label>
                   {!isSignup && (
                     <a
                       href={`/${user}/forgot-password`}
-                      className="ml-auto text-sm underline-offset-2 hover:underline"
+                      className="text-xs text-indigo-400 hover:text-indigo-300 hover:underline"
                     >
-                      Forgot your password?
+                      Forgot password?
                     </a>
                   )}
                 </div>
@@ -190,12 +201,12 @@ export function LoginForm({
                     type={showPassword ? "text" : "password"}
                     name="password"
                     required
-                    className="pr-10"
+                    className="pr-10 bg-slate-950/60 border-slate-800 text-white focus:border-indigo-500 rounded-xl"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer flex items-center justify-center"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer flex items-center justify-center"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -203,18 +214,18 @@ export function LoginForm({
                 </div>
               </div>
 
-              <Button type="submit" className="w-full">
-                {isSignup ? "Sign up" : "Login"}
+              <Button type="submit" className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 border-0 transition-all mt-2">
+                {isSignup ? "Create Account →" : "Sign In →"}
               </Button>
 
-              <div className="text-center text-sm">
+              <div className="text-center text-xs text-slate-400 mt-2">
                 {isSignup ? (
                   <>
                     Already have an account?{" "}
                     <button
                       type="button"
                       onClick={() => setIsSignup(false)}
-                      className="underline underline-offset-4 font-semibold text-primary"
+                      className="font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
                     >
                       Log in
                     </button>
@@ -225,27 +236,38 @@ export function LoginForm({
                     <button
                       type="button"
                       onClick={() => setIsSignup(true)}
-                      className="underline underline-offset-4 font-semibold text-primary"
+                      className="font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
                     >
-                      Sign up
+                      Sign up now
                     </button>
                   </>
                 )}
               </div>
             </div>
           </form>
-          <div className="bg-muted relative hidden md:block">
-            <img
-              src="/rider.jpg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            />
+          <div className="relative hidden md:flex bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-10 flex-col justify-between border-l border-slate-800">
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-6">
+                FastShip E-Commerce Network
+              </div>
+              <h2 className="text-3xl font-extrabold text-white leading-snug">
+                Powering Fast & Secure Deliveries Nationwide
+              </h2>
+              <p className="text-slate-400 text-sm mt-4 leading-relaxed">
+                Connect sellers, delivery partners, and customers with automated OTP doorstep verification and real-time parcel tracking.
+              </p>
+            </div>
+            <div className="relative z-10 pt-8 border-t border-slate-800/80">
+              <div className="flex items-center gap-6 text-xs text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> Live System</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span> OTP Secured</span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+      <div className="text-slate-500 text-center text-xs">
+        By clicking continue, you agree to FastShip&apos;s <a href="#" className="underline hover:text-slate-400">Terms of Service</a> and <a href="#" className="underline hover:text-slate-400">Privacy Policy</a>.
       </div>
     </div>
   )
