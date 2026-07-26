@@ -39,6 +39,7 @@ class UserService(BaseService):
                 for key, val in user_data.items():
                     if hasattr(existing_user, key) and val is not None:
                         setattr(existing_user, key, val)
+                existing_user.email_verified = True
                 await self._update(existing_user)
                 return existing_user
 
@@ -53,6 +54,7 @@ class UserService(BaseService):
 
         user = self.model(
             **user_data,
+            email_verified=True,
             password_hash=password_hash
         )
         user = await self._add(user)
