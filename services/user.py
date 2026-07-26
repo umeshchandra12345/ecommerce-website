@@ -65,8 +65,8 @@ class UserService(BaseService):
         })
         
         import os
-        if not base_url:
-            protocol = "https" if os.getenv("VERCEL") == "1" else "http"
+        if not base_url or "localhost" in base_url:
+            protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
             base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
         try:
             if os.getenv("VERCEL") == "1":
@@ -141,8 +141,9 @@ class UserService(BaseService):
             
         token = generate_url_safe_token({"id": str(user.id)}, salt="password-reset")
             
-        if not base_url:
-            base_url = f"http://{app_settings.APP_DOMAIN}"
+        if not base_url or "localhost" in base_url:
+            protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
+            base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
             
         import os
         try:

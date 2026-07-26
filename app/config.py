@@ -11,13 +11,16 @@ _base_config = SettingsConfigDict(
 
 class AppSettings(BaseSettings):
     APP_NAME: str = "FastShip"
-    _APP_DOMAIN: str = "localhost:8000"
+    _APP_DOMAIN: str = "udmbackend.vercel.app"
 
     @property
     def APP_DOMAIN(self) -> str:
-        if os.getenv("VERCEL") == "1":
-            return os.getenv("VERCEL_PROJECT_PRODUCTION_URL") or os.getenv("VERCEL_URL") or "udmbackend.vercel.app"
-        return os.getenv("APP_DOMAIN", self._APP_DOMAIN)
+        domain = os.getenv("APP_DOMAIN") or os.getenv("VERCEL_PROJECT_PRODUCTION_URL") or os.getenv("VERCEL_URL")
+        if domain:
+            # Strip any leading protocol if passed
+            domain = domain.replace("https://", "").replace("http://", "").strip("/")
+            return domain
+        return self._APP_DOMAIN
 class DatabaseSettings(BaseSettings):
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
