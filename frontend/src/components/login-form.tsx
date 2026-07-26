@@ -40,23 +40,25 @@ export function LoginForm({
       try {
         if (user === "seller") {
           const address = data.get("address")?.toString() || ""
-          const zip_code_str = data.get("zip_code")?.toString()
-          const zip_code = zip_code_str ? parseInt(zip_code_str, 10) : undefined
+          const zip_code_str = data.get("zip_code")?.toString()?.trim()
+          const parsed_zip = zip_code_str ? parseInt(zip_code_str, 10) : NaN
+          const zip_code = !isNaN(parsed_zip) ? parsed_zip : undefined
           
           await api.seller.registerSeller({
             name,
             email,
             password,
             address: address || undefined,
-            zip_code: zip_code || undefined,
+            zip_code: zip_code,
           })
         } else {
-          const zip_codes_str = data.get("serviceable_zip_codes")?.toString()
+          const zip_codes_str = data.get("serviceable_zip_codes")?.toString()?.trim()
           const serviceable_zip_codes = zip_codes_str
             ? zip_codes_str.split(",").map(z => parseInt(z.trim(), 10)).filter(z => !isNaN(z))
             : []
-          const capacity_str = data.get("max_handling_capacity")?.toString()
-          const max_handling_capacity = capacity_str ? parseInt(capacity_str, 10) : 5
+          const capacity_str = data.get("max_handling_capacity")?.toString()?.trim()
+          const parsed_cap = capacity_str ? parseInt(capacity_str, 10) : 5
+          const max_handling_capacity = !isNaN(parsed_cap) ? parsed_cap : 5
 
           await api.partner.registerDeliveryPartner({
             name,
@@ -72,15 +74,18 @@ export function LoginForm({
       } catch (error: any) {
         console.error("Signup error:", error)
         const detail = error?.response?.data?.detail
-        if (detail) {
-          let errorMsg = "Signup failed. Please check the entered data."
-          if (typeof detail === "string") {
-            errorMsg = detail
-          } else if (Array.isArray(detail)) {
-            errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ")
-          }
-          toast.error(errorMsg)
+        let errorMsg = "Signup failed. Please check your inputs."
+        if (typeof detail === "string") {
+          errorMsg = detail
+        } else if (Array.isArray(detail)) {
+          errorMsg = detail.map((d: any) => {
+            const field = d.loc && Array.isArray(d.loc) ? d.loc.filter((l: any) => l !== 'body').join(' -> ') : ''
+            return field ? `${field}: ${d.msg}` : d.msg || JSON.stringify(d)
+          }).join("; ")
+        } else if (error?.message) {
+          errorMsg = error.message
         }
+        toast.error(errorMsg)
       }
     } else {
       await login(user, email, password)
