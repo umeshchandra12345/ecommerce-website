@@ -26,11 +26,9 @@ export default function ShipmentView({ shipment }: { shipment: Shipment }) {
         ? shipment.estimated_delivery.split("T")[0]
         : shipment.estimated_delivery || "N/A";
 
+    const timeline = shipment.timeline || [];
+
     const details = [
-        {
-            "title": "Content",
-            "description": shipment.content || "N/A",
-        },
         {
             "title": "Weight",
             "description": `${shipment.weight ?? 0} kg`,
@@ -43,10 +41,13 @@ export default function ShipmentView({ shipment }: { shipment: Shipment }) {
             "title": "Estimated Delivery",
             "description": estimatedDeliveryStr,
         },
+        {
+            "title": "Total Updates",
+            "description": `${timeline.length} scans`,
+        },
     ]
 
     const tags = shipment.tags || [];
-    const timeline = shipment.timeline || [];
 
     return (
         <div className="flex flex-col gap-6 w-full max-w-[640px] relative text-left pt-2">
@@ -54,9 +55,9 @@ export default function ShipmentView({ shipment }: { shipment: Shipment }) {
                 <div className="w-14 h-14 bg-white text-[#FF6B4A] rounded-xl flex items-center justify-center shadow-xs border border-[#FF6B4A]/10 shrink-0">
                     <Package size={28} />
                 </div>
-                <div>
-                    <h3 className="font-extrabold text-slate-900 text-lg">{shipment.content || "Parcel"}</h3>
-                    <p className="text-xs text-slate-500 font-medium">Destination Pincode: <span className="text-[#FF6B4A] font-bold">{shipment.destination ?? "N/A"}</span></p>
+                <div className="min-w-0 flex-1">
+                    <h3 className="font-extrabold text-slate-900 text-base sm:text-lg leading-snug break-all">{shipment.content || "Parcel"}</h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">Destination Pincode: <span className="text-[#FF6B4A] font-bold">{shipment.destination ?? "N/A"}</span></p>
                 </div>
             </div>
 
@@ -73,7 +74,7 @@ export default function ShipmentView({ shipment }: { shipment: Shipment }) {
                 {details.map((item, index) => (
                     <div key={index} className="flex flex-col gap-0.5 min-w-0">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">{item.title}</span>
-                        <span className="text-sm font-extrabold text-slate-800 truncate block" title={String(item.description)}>{item.description}</span>
+                        <span className="text-sm font-extrabold text-slate-800 break-words block">{item.description}</span>
                     </div>
                 ))}
             </div>

@@ -74,14 +74,20 @@ export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
                 </div>
 
                 {/* Main Package Info */}
-                <div className="mb-4 rounded-xl bg-slate-50 p-3 border border-slate-100 flex items-center justify-between gap-3 text-xs">
-                    <div className="min-w-0 flex-1 pr-2">
-                        <span className="text-slate-400 font-bold uppercase block text-[10px]">Contents</span>
-                        <span className="font-bold text-slate-700 truncate block" title={shipment.content || "Parcel"}>{shipment.content || "Parcel"}</span>
+                <div className="mb-4 rounded-xl bg-slate-50 p-3.5 border border-slate-100 flex flex-col gap-2 text-xs">
+                    <div className="w-full">
+                        <span className="text-slate-400 font-bold uppercase block text-[10px] tracking-wider mb-0.5">Contents</span>
+                        <span className="font-extrabold text-slate-800 break-all block leading-snug">{shipment.content || "Parcel"}</span>
                     </div>
-                    <div className="text-right shrink-0">
-                        <span className="text-slate-400 font-bold uppercase block text-[10px]">Weight</span>
-                        <span className="font-bold text-[#FF6B4A]">{shipment.weight ? `${shipment.weight} kg` : "N/A"}</span>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+                        <div>
+                            <span className="text-slate-400 font-bold uppercase text-[10px] mr-1.5">Weight:</span>
+                            <span className="font-extrabold text-[#FF6B4A]">{shipment.weight ? `${shipment.weight} kg` : "N/A"}</span>
+                        </div>
+                        <div>
+                            <span className="text-slate-400 font-bold uppercase text-[10px] mr-1.5">Pincode:</span>
+                            <span className="font-extrabold text-slate-700">{shipment.destination ?? "N/A"}</span>
+                        </div>
                     </div>
                 </div>
 
