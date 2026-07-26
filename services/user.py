@@ -64,10 +64,10 @@ class UserService(BaseService):
             "id": str(user.id)
         })
         
-        if not base_url:
-            base_url = f"http://{app_settings.APP_DOMAIN}"
-            
         import os
+        if not base_url:
+            protocol = "https" if os.getenv("VERCEL") == "1" else "http"
+            base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
         try:
             if os.getenv("VERCEL") == "1":
                 await send_email_with_template_async(

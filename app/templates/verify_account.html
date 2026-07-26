@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verification | FastShip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #f8fafc;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+            text-decoration: none;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .icon-box {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+
+        .icon-box.pending {
+            background: rgba(99, 102, 241, 0.15);
+            border: 2px solid rgba(99, 102, 241, 0.4);
+            color: #818cf8;
+        }
+
+        .icon-box.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 2px solid rgba(34, 197, 94, 0.4);
+            color: #4ade80;
+        }
+
+        .icon-box.declined {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        p {
+            font-size: 15px;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .email-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e2e8f0;
+            margin-bottom: 28px;
+            word-break: break-all;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .footer {
+            margin-top: 32px;
+            font-size: 13px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="/" class="logo">🚚 <span>FastShip</span></a>
+
+        {% if is_verified %}
+            <div class="icon-box success">✓</div>
+            <h1>Account Verified! 🎉</h1>
+            <p>Your email address has been successfully verified. You can now log in to your FastShip <strong>{{ user_type | title }}</strong> account.</p>
+            <div class="email-badge">{{ email }}</div>
+            <div class="actions">
+                <a href="/{{ user_type }}/login" class="btn btn-primary">Go to Login →</a>
+            </div>
+            <script>
+                setTimeout(function() {
+                    window.location.href = "/{{ user_type }}/login";
+                }, 3500);
+            </script>
+
+        {% elif is_declined %}
+            <div class="icon-box declined">✕</div>
+            <h1>Verification Cancelled</h1>
+            <p>You chose not to verify this account. No changes have been made to your FastShip account.</p>
+            <div class="email-badge">{{ email }}</div>
+            <div class="actions">
+                <a href="/" class="btn btn-secondary">Return to Home</a>
+            </div>
+
+        {% elif is_error %}
+            <div class="icon-box declined">!</div>
+            <h1>Verification Link Invalid</h1>
+            <p>{{ error_message or "This email verification link is invalid or has expired." }}</p>
+            <div class="actions">
+                <a href="/{{ user_type or 'seller' }}/login" class="btn btn-primary">Back to Login</a>
+            </div>
+
+        {% else %}
+            <!-- Interactive Verification Decision Page -->
+            <div class="icon-box pending">✉️</div>
+            <h1>Confirm Account Verification</h1>
+            <p>Would you like to verify and activate your FastShip <strong>{{ user_type | title }}</strong> account?</p>
+            <div class="email-badge">{{ email }}</div>
+
+            <div class="actions">
+                <a href="?token={{ token }}&confirm=true" class="btn btn-primary">Yes, Verify My Account</a>
+                <a href="?token={{ token }}&action=decline" class="btn btn-secondary">No, Cancel</a>
+            </div>
+        {% endif %}
+
+        <div class="footer">
+            &copy; 2026 FastShip Logistics. All rights reserved.
+        </div>
+    </div>
+
+</body>
+</html>

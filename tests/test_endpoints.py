@@ -25,7 +25,7 @@ async def test_seller_full_flow(client: AsyncClient):
         "email": "new_seller@example.com",
         "id": seller_id
     })
-    response = await client.get("/seller/verify", params={"token": verify_token})
+    response = await client.get("/seller/verify", params={"token": verify_token}, headers={"Accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["detail"] == "Account Verified"
 
@@ -84,7 +84,7 @@ async def test_partner_full_flow(client: AsyncClient):
         "email": "new_partner@example.com",
         "id": partner_id
     })
-    response = await client.get("/partner/verify", params={"token": verify_token})
+    response = await client.get("/partner/verify", params={"token": verify_token}, headers={"Accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["detail"] == "Account Verified"
 

@@ -10,8 +10,14 @@ _base_config = SettingsConfigDict(
 )
 
 class AppSettings(BaseSettings):
-    APP_NAME:str ="FastShip"
-    APP_DOMAIN:str="localhost:8000"
+    APP_NAME: str = "FastShip"
+    _APP_DOMAIN: str = "localhost:8000"
+
+    @property
+    def APP_DOMAIN(self) -> str:
+        if os.getenv("VERCEL") == "1":
+            return os.getenv("VERCEL_PROJECT_PRODUCTION_URL") or os.getenv("VERCEL_URL") or "udmbackend.vercel.app"
+        return os.getenv("APP_DOMAIN", self._APP_DOMAIN)
 class DatabaseSettings(BaseSettings):
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432

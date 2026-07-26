@@ -144,9 +144,67 @@ async def login_for_access_token(
 
 ###Verify seller email
 @router.get("/verify")
-async def verify_seller_email(token:str,service:SellerServiceDep):
-    await service.verify_email(token)
-    return {"detail":"Account Verified"}
+async def verify_seller_email(
+    request: Request,
+    token: str,
+    service: SellerServiceDep,
+    confirm: bool | None = None,
+    action: str | None = None,
+):
+    if "application/json" in request.headers.get("accept", ""):
+        await service.verify_email(token)
+        return {"detail": "Account Verified"}
+
+    templates = Jinja2Templates(TEMPLATE_DIR)
+    
+    if action == "decline" or confirm is False:
+        return templates.TemplateResponse(
+            request=request,
+            name="verify_account.html",
+            context={
+                "is_declined": True,
+                "user_type": "seller",
+                "email": "Seller Account",
+            }
+        )
+
+    from utils import decode_url_safe_token
+    token_data = decode_url_safe_token(token)
+    email = token_data.get("email", "Seller Account") if token_data else "Seller Account"
+
+    if confirm is True:
+        try:
+            await service.verify_email(token)
+            return templates.TemplateResponse(
+                request=request,
+                name="verify_account.html",
+                context={
+                    "is_verified": True,
+                    "user_type": "seller",
+                    "email": email,
+                }
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request=request,
+                name="verify_account.html",
+                context={
+                    "is_error": True,
+                    "user_type": "seller",
+                    "email": email,
+                    "error_message": getattr(exc, "detail", "Invalid or expired token."),
+                }
+            )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="verify_account.html",
+        context={
+            "token": token,
+            "user_type": "seller",
+            "email": email,
+        }
+    )
 
 ###Email Password reset link
 @router.get("/forgot_password")

@@ -122,9 +122,67 @@ async def login_delivery_partner(
     
 ###Verify Delivery Partner Email 
 @router.get("/verify")
-async def verify_delivery_partner_email(token:str,service:DeliveryPartnerServiceDep):
-    await service.verify_email(token)
-    return {"detail":"Account Verified"}
+async def verify_delivery_partner_email(
+    request: Request,
+    token: str,
+    service: DeliveryPartnerServiceDep,
+    confirm: bool | None = None,
+    action: str | None = None,
+):
+    if "application/json" in request.headers.get("accept", ""):
+        await service.verify_email(token)
+        return {"detail": "Account Verified"}
+
+    templates = Jinja2Templates(TEMPLATE_DIR)
+    
+    if action == "decline" or confirm is False:
+        return templates.TemplateResponse(
+            request=request,
+            name="verify_account.html",
+            context={
+                "is_declined": True,
+                "user_type": "partner",
+                "email": "Delivery Partner Account",
+            }
+        )
+
+    from utils import decode_url_safe_token
+    token_data = decode_url_safe_token(token)
+    email = token_data.get("email", "Delivery Partner Account") if token_data else "Delivery Partner Account"
+
+    if confirm is True:
+        try:
+            await service.verify_email(token)
+            return templates.TemplateResponse(
+                request=request,
+                name="verify_account.html",
+                context={
+                    "is_verified": True,
+                    "user_type": "partner",
+                    "email": email,
+                }
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request=request,
+                name="verify_account.html",
+                context={
+                    "is_error": True,
+                    "user_type": "partner",
+                    "email": email,
+                    "error_message": getattr(exc, "detail", "Invalid or expired token."),
+                }
+            )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="verify_account.html",
+        context={
+            "token": token,
+            "user_type": "partner",
+            "email": email,
+        }
+    )
     
 ## update the delivery partner
 @router.post("/")
