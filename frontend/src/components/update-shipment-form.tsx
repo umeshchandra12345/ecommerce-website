@@ -27,9 +27,8 @@ import {
 } from "~/components/ui/select"
 import api from "~/lib/api"
 import { ShipmentStatus, type Shipment, type ShipmentUpdate } from "~/lib/client"
-import { cn, getLatestStatus } from "~/lib/utils"
+import { getLatestStatus } from "~/lib/utils"
 import { Button } from "./ui/button"
-import { SubmitButton } from "./ui/submit-button"
 import { QrReader } from 'react-qr-reader'
 
 
@@ -128,92 +127,112 @@ export function UpdateShipmentForm({
     const latestEvent = shipment?.timeline[shipment?.timeline.length - 1]
 
     return (
-        <div className={cn("flex flex-col gap-6 p-8 max-w-[640px]", className)} {...props}>
-            <form action={updateShipment}>
-                <div className="flex flex-col gap-6">
-                    <div className="flex flex-col gap-2">
-                        <h1 className="text-xl font-bold">Update shipment</h1>
+        <div className={`mx-auto w-full max-w-[680px] p-2 ${className || ''}`} {...props}>
+            <div className="card-elevated-white overflow-hidden p-8 sm:p-10 border border-[#FF6B4A]/15 bg-white shadow-xl shadow-[#FF6B4A]/5">
+                <div className="mb-8 rounded-2xl bg-gradient-to-r from-[#FFEFE8] to-[#FFF5F2] p-6 border border-[#FF6B4A]/10">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-[#FF6B4A]/10 px-3 py-1 text-xs font-bold text-[#FF6B4A] uppercase tracking-wider mb-2">
+                        🚚 Partner Execution
                     </div>
+                    <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Update Shipment Status</h1>
+                    <p className="text-sm text-slate-500 mt-1">Scan or enter Shipment ID to record transit scans or confirm doorstep OTP delivery.</p>
+                </div>
+
+                <form action={updateShipment} className="flex flex-col gap-6">
                     <div className="flex flex-col gap-6">
-                        <div className="flex w-full items-center space-x-2">
-                            <Input
-                                value={idInput}
-                                onChange={(e) => {
-                                    setIdInput(e.target.value)
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault()
+                        <div className="grid gap-2">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Shipment Search</Label>
+                            <div className="flex w-full items-center gap-2">
+                                <Input
+                                    value={idInput}
+                                    onChange={(e) => {
+                                        setIdInput(e.target.value)
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault()
+                                            if (idInput.trim()) {
+                                                onScan(idInput.trim())
+                                            }
+                                        }
+                                    }}
+                                    onPaste={(e) => {
+                                        setTimeout(() => {
+                                            const input = e.target as HTMLInputElement
+                                            if (input.value.trim()) {
+                                                onScan(input.value.trim())
+                                            }
+                                        }, 0)
+                                    }}
+                                    type="text"
+                                    name="id"
+                                    required
+                                    placeholder="Paste or enter Shipment ID (UUID)..."
+                                    className="h-12 flex-1 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
+                                />
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    className="h-12 px-5 rounded-xl border-[#FF6B4A]/20 bg-[#FFEFE8]/50 text-[#FF6B4A] font-bold hover:bg-[#FF6B4A] hover:text-white transition-all"
+                                    onClick={() => {
                                         if (idInput.trim()) {
                                             onScan(idInput.trim())
                                         }
-                                    }
-                                }}
-                                onPaste={(e) => {
-                                    // Wait for the paste value to be applied
-                                    setTimeout(() => {
-                                        const input = e.target as HTMLInputElement
-                                        if (input.value.trim()) {
-                                            onScan(input.value.trim())
-                                        }
-                                    }, 0)
-                                }}
-                                type="text"
-                                name="id"
-                                required
-                                placeholder="Shipment Id (e.g. 41eabcaf-...)"
-                            />
-                            <Button variant="outline" type="button" onClick={() => {
-                                if (idInput.trim()) {
-                                    onScan(idInput.trim())
-                                }
-                            }}>
-                                Search
-                            </Button>
-                            <QRScanner onScan={(scannedId) => {
-                                setIdInput(scannedId)
-                                onScan(scannedId)
-                            }}/>
+                                    }}
+                                >
+                                    Search
+                                </Button>
+                                <QRScanner onScan={(scannedId) => {
+                                    setIdInput(scannedId)
+                                    onScan(scannedId)
+                                }}/>
+                            </div>
                         </div>
+
                         <div className="grid gap-2">
-                            <Label>Status</Label>
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">New Status</Label>
                             <Select name="status" value={status} onValueChange={(value: string) => {
                                 setStatus(value as ShipmentStatus)
                             }}>
-                                <SelectTrigger className="w-full">
+                                <SelectTrigger className="h-12 w-full rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all">
                                     <SelectValue
-                                        placeholder={shipment ? getLatestStatus(shipment) : "Shipment Status"} />
+                                        placeholder={shipment ? getLatestStatus(shipment) : "Select Shipment Status"} />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="rounded-xl border-[#FF6B4A]/15 bg-white">
                                     {statusValues.map((status) => (
-                                        <SelectItem key={status} value={status}>
-                                            {status}
+                                        <SelectItem key={status} value={status} className="rounded-lg focus:bg-[#FFEFE8] focus:text-[#FF6B4A]">
+                                            {status.toUpperCase().replace(/_/g, " ")}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
+
                         {
-                            status === "delivered" && <div className="grid gap-2">
-                                <Label htmlFor="verification-code">Verification Code (6-digit OTP)</Label>
-                                <InputOTP maxLength={6} value={otp} onChange={(val) => setOtp(val)}>
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={0} />
-                                        <InputOTPSlot index={1} />
-                                        <InputOTPSlot index={2} />
-                                    </InputOTPGroup>
-                                    <InputOTPSeparator />
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={3} />
-                                        <InputOTPSlot index={4} />
-                                        <InputOTPSlot index={5} />
-                                    </InputOTPGroup>
-                                </InputOTP>
-                                <input type="hidden" name="verification-code" value={otp} />
-                            </div>
+                            status === "delivered" && (
+                                <div className="grid gap-3 rounded-2xl bg-[#FFEFE8]/70 p-5 border border-[#FF6B4A]/20">
+                                    <Label htmlFor="verification-code" className="text-xs font-bold uppercase tracking-wider text-[#FF6B4A]">
+                                        🔑 Customer Doorstep OTP Code (Required for Delivered)
+                                    </Label>
+                                    <InputOTP maxLength={6} value={otp} onChange={(val) => setOtp(val)}>
+                                        <InputOTPGroup className="gap-1">
+                                            <InputOTPSlot index={0} className="h-12 w-12 rounded-xl bg-white border-[#FF6B4A]/30 text-lg font-bold text-slate-800" />
+                                            <InputOTPSlot index={1} className="h-12 w-12 rounded-xl bg-white border-[#FF6B4A]/30 text-lg font-bold text-slate-800" />
+                                            <InputOTPSlot index={2} className="h-12 w-12 rounded-xl bg-white border-[#FF6B4A]/30 text-lg font-bold text-slate-800" />
+                                        </InputOTPGroup>
+                                        <InputOTPSeparator className="text-[#FF6B4A]" />
+                                        <InputOTPGroup className="gap-1">
+                                            <InputOTPSlot index={3} className="h-12 w-12 rounded-xl bg-white border-[#FF6B4A]/30 text-lg font-bold text-slate-800" />
+                                            <InputOTPSlot index={4} className="h-12 w-12 rounded-xl bg-white border-[#FF6B4A]/30 text-lg font-bold text-slate-800" />
+                                            <InputOTPSlot index={5} className="h-12 w-12 rounded-xl bg-white border-[#FF6B4A]/30 text-lg font-bold text-slate-800" />
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                    <input type="hidden" name="verification-code" value={otp} />
+                                </div>
+                            )
                         }
+
                         <div className="grid gap-2">
-                            <Label htmlFor="location">Location</Label>
+                            <Label htmlFor="location" className="text-xs font-bold uppercase tracking-wider text-slate-500">Scan Location Pincode</Label>
                             <Input
                                 id="location"
                                 name="location"
@@ -221,12 +240,14 @@ export function UpdateShipmentForm({
                                 placeholder={
                                     latestEvent?.location
                                         ? latestEvent.location.toString()
-                                        : "Location"
+                                        : "e.g. 110001"
                                 }
+                                className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
                             />
                         </div>
+
                         <div className="grid gap-2">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-slate-500">Scan Remarks / Note</Label>
                             <Input
                                 id="description"
                                 name="description"
@@ -234,14 +255,21 @@ export function UpdateShipmentForm({
                                 placeholder={
                                     latestEvent?.description
                                         ? latestEvent.description
-                                        : "scanned at ..."
+                                        : "e.g. Processed at sorting facility..."
                                 }
+                                className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
                             />
                         </div>
-                        <SubmitButton text="Update" />
+
+                        <button
+                            type="submit"
+                            className="btn-coral-gradient mt-4 h-12 w-full rounded-xl font-bold uppercase tracking-wider text-white transition-all hover:scale-[1.01]"
+                        >
+                            UPDATE SHIPMENT →
+                        </button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     )
 }

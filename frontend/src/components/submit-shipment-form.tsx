@@ -2,7 +2,6 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import api from "~/lib/api"
 import type { ShipmentCreate } from "~/lib/client"
-import { SubmitButton } from "./ui/submit-button"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import type { AxiosError } from "axios"
@@ -58,66 +57,87 @@ export function SubmitShipmentForm({
   }
 
   return (
-    <form {...props} action={submitShipment}>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-xl font-bold">Submit a new shipment</h1>
+    <div className="mx-auto w-full max-w-[640px] p-2">
+      <div className="card-elevated-white overflow-hidden p-8 sm:p-10 border border-[#FF6B4A]/15 bg-white shadow-xl shadow-[#FF6B4A]/5">
+        <div className="mb-8 rounded-2xl bg-gradient-to-r from-[#FFEFE8] to-[#FFF5F2] p-6 border border-[#FF6B4A]/10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#FF6B4A]/10 px-3 py-1 text-xs font-bold text-[#FF6B4A] uppercase tracking-wider mb-2">
+            📦 Logistics Management
+          </div>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Submit a new shipment</h1>
+          <p className="text-sm text-slate-500 mt-1">Enter parcel details for automated courier allocation and customer tracking.</p>
         </div>
-        <div className="flex flex-col gap-6">
+
+        <form {...props} action={submitShipment} className="flex flex-col gap-6">
           <div className="grid gap-2">
-            <Label htmlFor="content">Contents</Label>
+            <Label htmlFor="content" className="text-xs font-bold uppercase tracking-wider text-slate-500">Parcel Contents</Label>
             <Input
               id="content"
               name="content"
               type="text"
-              placeholder="Shipment contents"
+              placeholder="e.g. MacBook Pro, Electronics, Documents"
+              className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
               required
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="weight">Weight</Label>
-            <Input
-              id="weight"
-              name="weight"
-              step={0.1}
-              type="number"
-              max={25}
-              placeholder="Weight in kg"
-              required
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="weight" className="text-xs font-bold uppercase tracking-wider text-slate-500">Weight (KG)</Label>
+              <Input
+                id="weight"
+                name="weight"
+                step={0.1}
+                type="number"
+                max={25}
+                placeholder="e.g. 2.5"
+                className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="destination" className="text-xs font-bold uppercase tracking-wider text-slate-500">Destination Pincode</Label>
+              <Input
+                id="destination"
+                name="destination"
+                type="number"
+                placeholder="e.g. 110001"
+                className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
+                required
+              />
+            </div>
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="destination">Destination</Label>
-            <Input
-              id="destination"
-              name="destination"
-              type="number"
-              placeholder="110001"
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="client-contact-email">Client Email</Label>
+            <Label htmlFor="client-contact-email" className="text-xs font-bold uppercase tracking-wider text-slate-500">Recipient Email</Label>
             <Input
               id="client-contact-email"
               name="client-contact-email"
               type="email"
-              placeholder="m@example.com"
+              placeholder="customer@example.com"
+              className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
               required
             />
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="client-contact-phone">Client Phone</Label>
+            <Label htmlFor="client-contact-phone" className="text-xs font-bold uppercase tracking-wider text-slate-500">Recipient Phone (Optional)</Label>
             <Input
               id="client-contact-phone"
               name="client-contact-phone"
               type="phone"
-              placeholder="+1 234 567 890"
+              placeholder="+91 98765 43210"
+              className="h-12 rounded-xl bg-slate-100/70 border-none px-4 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
             />
           </div>
-          <SubmitButton text="Submit" />
-        </div>
+
+          <button
+            type="submit"
+            className="btn-coral-gradient mt-4 h-12 w-full rounded-xl font-bold uppercase tracking-wider text-white transition-all hover:scale-[1.01]"
+          >
+            SUBMIT SHIPMENT →
+          </button>
+        </form>
       </div>
-    </form>
+    </div>
   )
 }

@@ -106,49 +106,54 @@ export default function DashboardPage() {
       }
     >
       <AppSidebar currentRoute="Dashboard" />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between border-b">
-          <div className="flex items-center gap-2">
+      <SidebarInset className="bg-[#FFF5F2]/50 min-h-screen">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-6 border-b border-[#FF6B4A]/10 bg-white/70 backdrop-blur-md">
+          <div className="flex items-center gap-3">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
+              className="mr-2 data-[orientation=vertical]:h-4 bg-[#FF6B4A]/20"
             />
-            <h2 className="font-semibold text-lg">Dashboard Overview</h2>
+            <h2 className="font-extrabold text-lg text-slate-800 tracking-tight">Dashboard Overview</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[#FFEFE8] px-3 py-1 text-xs font-bold text-[#FF6B4A] border border-[#FF6B4A]/20 uppercase tracking-wider">
+              {user === "seller" ? "Seller Portal" : "Partner Portal"}
+            </span>
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-6 p-6">
+        <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
           {/* Top Analytics Cards */}
           {isFetching && !data ? (
             <Loading />
           ) : (
             <>
               <div className="grid auto-rows-min gap-4 md:grid-cols-4">
-                <NumberLabel value={totalCount} label="Total Filtered Shipments" />
-                <NumberLabel value={getShipmentsCountForStatus(shipmentsList, ShipmentStatus.Placed)} label="Placed" />
-                <NumberLabel value={getShipmentsCountForStatus(shipmentsList, ShipmentStatus.InTransit)} label="In Transit" />
-                <NumberLabel value={getShipmentsCountForStatus(shipmentsList, ShipmentStatus.Delivered)} label="Delivered" />
+                <NumberLabel value={totalCount} label="Total Shipments" icon="📦" />
+                <NumberLabel value={getShipmentsCountForStatus(shipmentsList, ShipmentStatus.Placed)} label="Placed" icon="🆕" />
+                <NumberLabel value={getShipmentsCountForStatus(shipmentsList, ShipmentStatus.InTransit)} label="In Transit" icon="🚚" />
+                <NumberLabel value={getShipmentsCountForStatus(shipmentsList, ShipmentStatus.Delivered)} label="Delivered" icon="✅" />
               </div>
 
               {/* Search & Filter Controls */}
-              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-slate-50 p-4 rounded-xl border">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-5 rounded-2xl border border-[#FF6B4A]/15 shadow-sm">
                 <div className="relative w-full sm:w-80">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                   <Input
-                    placeholder="Search package content or email..."
+                    placeholder="Search contents or email..."
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value)
                       setPage(1)
                     }}
-                    className="pl-9 bg-white"
+                    className="pl-10 h-11 rounded-xl bg-slate-100/70 border-none text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all"
                   />
                 </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                    <Filter className="size-4" /> Filter Status:
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <Filter className="size-4 text-[#FF6B4A]" /> Status:
                   </div>
                   <Select
                     value={statusFilter}
@@ -157,15 +162,15 @@ export default function DashboardPage() {
                       setPage(1)
                     }}
                   >
-                    <SelectTrigger className="w-44 bg-white">
+                    <SelectTrigger className="h-11 w-44 rounded-xl bg-slate-100/70 border-none text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#FF6B4A]/40 transition-all font-medium">
                       <SelectValue placeholder="All Statuses" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="placed">Placed</SelectItem>
-                      <SelectItem value="in_transit">In Transit</SelectItem>
-                      <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                      <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectContent className="rounded-xl border-[#FF6B4A]/15 bg-white">
+                      <SelectItem value="all" className="rounded-lg focus:bg-[#FFEFE8] focus:text-[#FF6B4A]">All Statuses</SelectItem>
+                      <SelectItem value="placed" className="rounded-lg focus:bg-[#FFEFE8] focus:text-[#FF6B4A]">Placed</SelectItem>
+                      <SelectItem value="in_transit" className="rounded-lg focus:bg-[#FFEFE8] focus:text-[#FF6B4A]">In Transit</SelectItem>
+                      <SelectItem value="out_for_delivery" className="rounded-lg focus:bg-[#FFEFE8] focus:text-[#FF6B4A]">Out for Delivery</SelectItem>
+                      <SelectItem value="delivered" className="rounded-lg focus:bg-[#FFEFE8] focus:text-[#FF6B4A]">Delivered</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -173,12 +178,13 @@ export default function DashboardPage() {
 
               {/* Shipments Cards Grid */}
               {shipmentsList.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-12 border rounded-xl bg-slate-50 text-slate-500 gap-2">
-                  <p className="font-semibold text-lg">No shipments found</p>
-                  <p className="text-sm">Try adjusting your search query or status filter.</p>
+                <div className="flex flex-col items-center justify-center p-12 border border-[#FF6B4A]/15 rounded-2xl bg-white text-slate-500 gap-2 shadow-sm">
+                  <span className="text-4xl mb-2">📦</span>
+                  <p className="font-extrabold text-lg text-slate-800">No shipments found</p>
+                  <p className="text-sm text-slate-400">Try adjusting your search query or status filter.</p>
                 </div>
               ) : (
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3 xl:grid-cols-4">
+                <div className="grid auto-rows-min gap-5 md:grid-cols-3 xl:grid-cols-4">
                   {shipmentsList.map((shipment: any) => (
                     <ShipmentCard key={shipment.id} shipment={shipment} />
                   ))}
@@ -187,9 +193,9 @@ export default function DashboardPage() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t pt-4 mt-2">
-                  <span className="text-sm text-slate-500">
-                    Showing Page <strong className="text-slate-800">{page}</strong> of <strong className="text-slate-800">{totalPages}</strong>
+                <div className="flex items-center justify-between border-t border-[#FF6B4A]/10 pt-5 mt-2">
+                  <span className="text-sm font-medium text-slate-500">
+                    Showing Page <strong className="text-[#FF6B4A]">{page}</strong> of <strong className="text-slate-800">{totalPages}</strong>
                   </span>
                   <div className="flex items-center gap-2">
                     <Button
@@ -197,7 +203,7 @@ export default function DashboardPage() {
                       size="sm"
                       disabled={page === 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="gap-1"
+                      className="h-10 px-4 rounded-xl border-[#FF6B4A]/20 bg-white text-slate-700 hover:bg-[#FFEFE8] hover:text-[#FF6B4A] gap-1 transition-all"
                     >
                       <ChevronLeft className="size-4" /> Previous
                     </Button>
@@ -206,7 +212,7 @@ export default function DashboardPage() {
                       size="sm"
                       disabled={page >= totalPages}
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      className="gap-1"
+                      className="h-10 px-4 rounded-xl border-[#FF6B4A]/20 bg-white text-slate-700 hover:bg-[#FFEFE8] hover:text-[#FF6B4A] gap-1 transition-all"
                     >
                       Next <ChevronRight className="size-4" />
                     </Button>
@@ -221,11 +227,16 @@ export default function DashboardPage() {
   )
 }
 
-function NumberLabel({ value, label }: { value: number; label: string }) {
+function NumberLabel({ value, label, icon }: { value: number; label: string; icon: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <h1 className="text-3xl font-extrabold text-slate-900">{value}</h1>
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</p>
+    <div className="flex items-center justify-between rounded-2xl border border-[#FF6B4A]/15 bg-white p-5 shadow-sm hover:shadow-md transition-all">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-extrabold text-slate-800">{value}</h1>
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+      </div>
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFEFE8] text-2xl border border-[#FF6B4A]/15">
+        {icon}
+      </div>
     </div>
   )
 }

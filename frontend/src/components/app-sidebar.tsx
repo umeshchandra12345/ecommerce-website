@@ -29,40 +29,59 @@ export function AppSidebar({ currentRoute, ...props }: { currentRoute: string } 
   ]
 
   return (
-    <Sidebar variant="floating" {...props}>
-      <SidebarHeader>
+    <Sidebar variant="floating" className="border-r border-[#FF6B4A]/10 bg-white/80 backdrop-blur-md" {...props}>
+      <SidebarHeader className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Package className="size-4" />
+            <SidebarMenuButton size="lg" asChild className="hover:bg-[#FFEFE8]/60 transition-colors rounded-2xl">
+              <a href="/dashboard" className="flex items-center gap-3">
+                <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6B4A] to-[#FF8F73] text-white shadow-md shadow-[#FF6B4A]/20">
+                  <Package className="size-5" />
                 </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">FastShip</span>
-                  <span className="">DMS</span>
+                <div className="flex flex-col leading-tight">
+                  <span className="font-bold text-slate-800 text-base">FastShip</span>
+                  <span className="text-xs font-medium text-[#FF6B4A] tracking-wider uppercase">Delivery Network</span>
                 </div>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-3">
         <SidebarGroup>
-          <SidebarMenu className="gap-1">
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={currentRoute === item.title}>
-                  <a href={item.url}>
-                    {item.title}
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+          <SidebarMenu className="gap-2">
+            {menuItems.map((item) => {
+              const isActive = currentRoute === item.title
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive}
+                    className={`rounded-xl px-4 py-2.5 font-medium transition-all ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#FF6B4A] to-[#FF8F73] text-white shadow-md shadow-[#FF6B4A]/25 hover:text-white"
+                        : "text-slate-600 hover:bg-[#FFEFE8] hover:text-[#FF6B4A]"
+                    }`}
+                  >
+                    <a href={item.url}>
+                      {item.title}
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
             {
               user === "seller" && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={currentRoute === "Submit Shipment"}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={currentRoute === "Submit Shipment"}
+                    className={`rounded-xl px-4 py-2.5 font-medium transition-all ${
+                      currentRoute === "Submit Shipment"
+                        ? "bg-gradient-to-r from-[#FF6B4A] to-[#FF8F73] text-white shadow-md shadow-[#FF6B4A]/25 hover:text-white"
+                        : "text-slate-600 hover:bg-[#FFEFE8] hover:text-[#FF6B4A]"
+                    }`}
+                  >
                     <a href="/submit-shipment">
                       Submit Shipment
                     </a>
@@ -73,7 +92,15 @@ export function AppSidebar({ currentRoute, ...props }: { currentRoute: string } 
             {
               user === "partner" && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={currentRoute === "Update Shipment"}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={currentRoute === "Update Shipment"}
+                    className={`rounded-xl px-4 py-2.5 font-medium transition-all ${
+                      currentRoute === "Update Shipment"
+                        ? "bg-gradient-to-r from-[#FF6B4A] to-[#FF8F73] text-white shadow-md shadow-[#FF6B4A]/25 hover:text-white"
+                        : "text-slate-600 hover:bg-[#FFEFE8] hover:text-[#FF6B4A]"
+                    }`}
+                  >
                     <a href="/update-shipment">
                       Update Shipment
                     </a>
