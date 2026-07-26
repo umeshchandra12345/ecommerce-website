@@ -71,9 +71,9 @@ export default function ShipmentView({ shipment }: { shipment: Shipment }) {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 {details.map((item, index) => (
-                    <div key={index} className="flex flex-col gap-0.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{item.title}</span>
-                        <span className="text-sm font-extrabold text-slate-800">{item.description}</span>
+                    <div key={index} className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">{item.title}</span>
+                        <span className="text-sm font-extrabold text-slate-800 truncate block" title={String(item.description)}>{item.description}</span>
                     </div>
                 ))}
             </div>
