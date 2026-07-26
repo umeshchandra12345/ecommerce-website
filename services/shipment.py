@@ -134,11 +134,20 @@ class ShipmentService(BaseService):
         return await self._update(shipment)
     
     
-    async def rate(self,token:str , review:ShipmentReview):
-        token_data= decode_url_safe_token(token)
-        if not token_data:
-            raise InvalidToken()
-        shipment=await self.get(UUID(token_data["id"]))
+    async def rate(self, token: str, review: ShipmentReview):
+        shipment_id = None
+        token_data = decode_url_safe_token(token)
+        if token_data and "id" in token_data:
+            shipment_id = UUID(str(token_data["id"]))
+        else:
+            try:
+                shipment_id = UUID(str(token))
+            except Exception:
+                raise InvalidToken()
+        
+        shipment = await self.get(shipment_id)
+        if not shipment:
+            raise EntityNotFound()
         
         new_review = Review(
             rating=review.rating,
