@@ -19,15 +19,11 @@
       "destination": "/app/main.py"
     },
     {
-      "source": "/seller/(.*)",
+      "source": "/docs",
       "destination": "/app/main.py"
     },
     {
-      "source": "/partner/(.*)",
-      "destination": "/app/main.py"
-    },
-    {
-      "source": "/shipment/(.*)",
+      "source": "/openapi.json",
       "destination": "/app/main.py"
     },
     {
@@ -35,7 +31,7 @@
       "destination": "/frontend/$1"
     },
     {
-      "source": "/((?!api|seller|partner|shipment).*)",
+      "source": "/(.*)",
       "destination": "/frontend/index.html"
     }
   ]
