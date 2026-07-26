@@ -7,6 +7,8 @@ class BaseSeller(BaseModel):
     address: str | None = None
     zip_code: int | None = None
 
+    model_config = {"from_attributes": True}
+
     @field_validator("address", mode="before")
     @classmethod
     def coerce_address_to_string(cls, v):

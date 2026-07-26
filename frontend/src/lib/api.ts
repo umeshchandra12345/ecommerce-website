@@ -28,7 +28,9 @@ api.instance.interceptors.response.use(
     if (error?.response?.status === 401) {
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
-      // Don't hard-redirect; let React auth guards handle navigation
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event("auth:unauthorized"));
+      }
     }
     return Promise.reject(error);
   }

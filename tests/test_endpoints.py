@@ -189,7 +189,7 @@ async def test_shipment_full_flow(client: AsyncClient, seller_token: str):
     tags = response.json()["tags"]
     assert not any(t["name"] == "fragile" for t in tags)
 
-    # 6. Update Shipment Status
+    # 6. Update Shipment Status to in_transit
     update_payload = {
         "status": "in_transit",
         "location": 110001,
@@ -197,6 +197,27 @@ async def test_shipment_full_flow(client: AsyncClient, seller_token: str):
     }
     response = await client.patch("/shipment/", params={"id": shipment_id}, json=update_payload, headers=partner_headers)
     assert response.status_code == 200
+
+    # 6a. Update Shipment Status to out_for_delivery (generates OTP)
+    response = await client.patch("/shipment/", params={"id": shipment_id}, json={"status": "out_for_delivery"}, headers=partner_headers)
+    assert response.status_code == 200
+
+    # Retrieve OTP from tracking page
+    track_resp = await client.get("/shipment/track", params={"id": shipment_id})
+    assert track_resp.status_code == 200
+    assert "Verification Code" in track_resp.text or "otp-code" in track_resp.text
+
+    from app.database.redis import get_shipment_verification_code
+    otp_code = await get_shipment_verification_code(UUID(shipment_id))
+    assert otp_code is not None
+
+    # 6b. Update Shipment Status to delivered WITHOUT OTP -> should fail (401 ClientNotAuthorized)
+    fail_delivery = await client.patch("/shipment/", params={"id": shipment_id}, json={"status": "delivered", "verification_code": "000000"}, headers=partner_headers)
+    assert fail_delivery.status_code == 401
+
+    # 6c. Update Shipment Status to delivered WITH correct OTP -> should succeed (200)
+    success_delivery = await client.patch("/shipment/", params={"id": shipment_id}, json={"status": "delivered", "verification_code": str(otp_code)}, headers=partner_headers)
+    assert success_delivery.status_code == 200
 
     # 7. Cancel Shipment (let's create another one and cancel it)
     response = await client.post("/shipment/", json=shipment_payload, headers=seller_headers)

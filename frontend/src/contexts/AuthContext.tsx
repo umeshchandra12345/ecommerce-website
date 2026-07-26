@@ -31,7 +31,21 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
             setToken(null)
         }
-    }, [])
+
+        const handleUnauthorized = () => {
+            setToken(null)
+            setUser(undefined)
+            api.setSecurityData(null)
+            sessionStorage.removeItem("token")
+            sessionStorage.removeItem("user")
+            navigate("/seller/login")
+        }
+
+        window.addEventListener("auth:unauthorized", handleUnauthorized)
+        return () => {
+            window.removeEventListener("auth:unauthorized", handleUnauthorized)
+        }
+    }, [navigate])
 
     async function login(user_type: UserType, email: string, password: string) {
         try {
