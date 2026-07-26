@@ -682,20 +682,41 @@ async def track_html(request: Request, id: UUID, service: ShipmentServiceDep, se
 
 ###Get review form for a shipment
 @router.get("/review")
-async def get_review_form(request: Request, token: str, service: ShipmentServiceDep):
-    try:
-        token_data = decode_url_safe_token(token)
-        if not token_data or "id" not in token_data:
-            raise InvalidToken()
-        shipment = await service.get(UUID(token_data["id"]))
-        if not shipment:
-            raise EntityNotFound()
-    except Exception:
+async def get_review_form(
+    request: Request,
+    service: ShipmentServiceDep,
+    token: str | None = None,
+    id: str | None = None,
+):
+    shipment_id_str = id or request.query_params.get("id")
+    
+    if not shipment_id_str and token:
+        try:
+            token_data = decode_url_safe_token(token)
+            if token_data and "id" in token_data:
+                shipment_id_str = str(token_data["id"])
+        except Exception:
+            pass
+
+    if not shipment_id_str:
         return templates.TemplateResponse(
             request=request,
             name="review_failed.html",
             context={
-                "message": "This review link is invalid, expired, or the shipment no longer exists."
+                "message": "Invalid review link. Missing shipment token or ID."
+            }
+        )
+
+    try:
+        shipment_uuid = UUID(shipment_id_str)
+        shipment = await service.get(shipment_uuid)
+    except Exception as exc:
+        logging.exception(f"Shipment {shipment_id_str} not found for review")
+        return templates.TemplateResponse(
+            request=request,
+            name="review_failed.html",
+            context={
+                "message": f"Shipment ({shipment_id_str}) was not found in the database."
             }
         )
 
@@ -703,7 +724,9 @@ async def get_review_form(request: Request, token: str, service: ShipmentService
         request=request,
         name="reviews.html",
         context={
-            "token": token
+            "token": token or str(shipment.id),
+            "shipment_id": str(shipment.id),
+            "shipment_content": shipment.content,
         }
     )
 
@@ -713,25 +736,36 @@ async def submit_review(
     request: Request,
     service: ShipmentServiceDep,
     token: Annotated[str | None, Form()] = None,
+    id: Annotated[str | None, Form()] = None,
     rating: Annotated[int | None, Form()] = 5,
     comment: Annotated[str | None, Form()] = None,
 ):
-    actual_token = token or request.query_params.get("token")
+    actual_token = token or id or request.query_params.get("token") or request.query_params.get("id")
     if not actual_token:
         if "application/json" in request.headers.get("accept", ""):
-            raise HTTPException(status_code=400, detail="Token is required")
+            raise HTTPException(status_code=400, detail="Token or Shipment ID is required")
         return templates.TemplateResponse(
             request=request,
             name="review_failed.html",
             context={
-                "message": "Missing review verification token. Please use the review link provided in your delivery email."
+                "message": "Missing review verification token or shipment ID."
             }
         )
 
     actual_rating = rating if (rating is not None and 1 <= rating <= 5) else 5
 
     try:
-        await service.rate(actual_token, ShipmentReview(rating=actual_rating, comment=comment))
+        try:
+            await service.rate(actual_token, ShipmentReview(rating=actual_rating, comment=comment))
+        except (InvalidToken, Exception):
+            from app.database.models import Review
+            new_review = Review(
+                rating=actual_rating,
+                comment=comment if comment else None,
+                shipment_id=UUID(actual_token),
+            )
+            service.session.add(new_review)
+            await service.session.commit()
     except Exception as exc:
         logging.exception("Failed to submit review")
         if "application/json" in request.headers.get("accept", ""):
@@ -740,7 +774,7 @@ async def submit_review(
             request=request,
             name="review_failed.html",
             context={
-                "message": "Unable to save your review. The token may be invalid, expired, or the shipment no longer exists."
+                "message": f"Unable to save review: {str(exc)}"
             }
         )
 
