@@ -68,10 +68,13 @@ class ShipmentEventService(BaseService):
 
         subject = ""
         template_name = None
+        seller_name = shipment.seller.name if getattr(shipment, "seller", None) else "FastShip Seller"
+        partner_name = shipment.delivery_partner.name if getattr(shipment, "delivery_partner", None) else "our delivery partner"
+
         context = {
             "id": str(shipment.id),
-            "seller": shipment.seller.name,
-            "partner": shipment.delivery_partner.name if shipment.delivery_partner else "our delivery partner",
+            "seller": seller_name,
+            "partner": partner_name,
             "content": shipment.content,
             "destination": shipment.destination,
             "estimated_delivery": shipment.estimated_delivery.strftime("%B %d, %Y") if shipment.estimated_delivery else "TBD",
@@ -82,8 +85,8 @@ class ShipmentEventService(BaseService):
             case ShipmentStatus.placed:
                 subject = "Your Order is Shipped 🚚"
                 context["id"]=str(shipment.id)
-                context["seller"]=shipment.seller.name
-                context["partner"]=shipment.delivery_partner.name
+                context["seller"]=seller_name
+                context["partner"]=partner_name
                 template_name = "mail_placed.html"
 
             case ShipmentStatus.out_for_delivery:
@@ -96,7 +99,7 @@ class ShipmentEventService(BaseService):
                 context["verification_code"] = code
             case ShipmentStatus.delivered:
                 subject = "Your Order is Delivered✅"
-                context["seller"]= shipment.seller.name
+                context["seller"] = seller_name
                 token=generate_url_safe_token({"id":str(shipment.id)})
                 context["review_url"]=f"http://{app_settings.APP_DOMAIN}/shipment/review?token={token}"
                 template_name = "mail_delivered.html"
