@@ -682,14 +682,28 @@ async def track_html(request: Request, id: UUID, service: ShipmentServiceDep, se
 
 ###Get review form for a shipment
 @router.get("/review")
-async def get_review_form(request: Request, token: str):
-    protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
-    base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
+async def get_review_form(request: Request, token: str, service: ShipmentServiceDep):
+    try:
+        token_data = decode_url_safe_token(token)
+        if not token_data or "id" not in token_data:
+            raise InvalidToken()
+        shipment = await service.get(UUID(token_data["id"]))
+        if not shipment:
+            raise EntityNotFound()
+    except Exception:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_failed.html",
+            context={
+                "message": "This review link is invalid, expired, or the shipment no longer exists."
+            }
+        )
+
     return templates.TemplateResponse(
         request=request,
         name="reviews.html",
         context={
-            "request_url": f"{base_url}/api/shipment/review?token={token}"
+            "token": token
         }
     )
 
@@ -702,7 +716,19 @@ async def submit_review(
     service: ShipmentServiceDep,
     comment: Annotated[str | None, Form()] = None,
 ):
-    await service.rate(token, ShipmentReview(rating=rating, comment=comment))
+    try:
+        await service.rate(token, ShipmentReview(rating=rating, comment=comment))
+    except Exception as exc:
+        logging.exception("Failed to submit review")
+        if "application/json" in request.headers.get("accept", ""):
+            raise HTTPException(status_code=400, detail=str(exc))
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_failed.html",
+            context={
+                "message": "Unable to save your review. The token may be invalid, expired, or the shipment no longer exists."
+            }
+        )
 
     if "application/json" in request.headers.get("accept", ""):
         return {"detail": "Review Submitted"}
