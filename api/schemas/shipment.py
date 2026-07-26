@@ -48,11 +48,23 @@ class ShipmentCreate(BaseShipment):
     
 
 class ShipmentUpdate(BaseModel):
-    location:int | None=Field(default=None)
+    location: int | None = Field(default=None)
     status: ShipmentStatus | None = Field(default=None)
-    verification_code:str | None = Field(default= None)
-    description:str | None=Field(default=None)
+    verification_code: str | None = Field(default=None)
+    description: str | None = Field(default=None)
     estimated_delivery: datetime | None = Field(default=None)
+
+    @field_validator("location", mode="before")
+    @classmethod
+    def coerce_location(cls, v):
+        if v is None or v == "":
+            return None
+        if isinstance(v, str):
+            try:
+                return int(v.strip())
+            except ValueError:
+                return None
+        return v
     
 
 

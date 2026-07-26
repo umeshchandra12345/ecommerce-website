@@ -66,45 +66,56 @@ export function UpdateShipmentForm({
         }) => api.shipment.updateShipment({ id }, update),
         onSuccess: () => {
             toast.success("Shipment updated successfully")
-            queryClient.invalidateQueries({ queryKey: [shipment!.id] })
-        },
-        onError: () => {
-            if (status === "delivered") {
-                toast.error("Invalid verification code")
-            } else {
-                toast.error("Failed to update shipment")
+            if (shipment?.id) {
+                queryClient.invalidateQueries({ queryKey: [shipment.id] })
             }
+            queryClient.invalidateQueries({ queryKey: ["shipments"] })
+        },
+        onError: (error: any) => {
+            console.error("Update shipment error:", error)
+            const detail = error?.response?.data?.detail
+            let errorMsg = "Failed to update shipment"
+            if (typeof detail === "string") {
+                errorMsg = detail
+            } else if (Array.isArray(detail)) {
+                errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ")
+            } else if (error?.message) {
+                errorMsg = error.message
+            }
+            toast.error(errorMsg)
         }
     })
 
-    const updateShipment = async (shipment: FormData) => {
-        const id = shipment.get("id")?.toString()
-        const verificationCode = shipment.get("verification-code")?.toString()
-        const location = shipment.get("location")?.toString()
-        const description = shipment.get("description")?.toString()
+    const updateShipment = async (shipmentForm: FormData) => {
+        const id = shipmentForm.get("id")?.toString()?.trim() || idInput.trim()
+        const verificationCode = shipmentForm.get("verification-code")?.toString()?.trim()
+        const location_str = shipmentForm.get("location")?.toString()?.trim()
+        const description = shipmentForm.get("description")?.toString()?.trim()
 
         if (!id) {
             toast.warning("Please enter a Shipment ID")
             return
         }
 
-        if (!status && !location && !description) {
-            toast.warning("Please provide an update")
+        const location = location_str && !isNaN(parseInt(location_str, 10)) ? parseInt(location_str, 10) : undefined
+
+        if (!status && location === undefined && !description) {
+            toast.warning("Please select a status or provide location/description to update")
             return
         }
 
-        if (status === "delivered" && !verificationCode) {
-            toast.warning("Please enter the verification code")
+        if (status === ShipmentStatus.Delivered && !verificationCode) {
+            toast.warning("Please enter the 6-digit OTP verification code")
             return
         }
 
         shipments.mutate({
             id: id,
             update: {
-                status: status,
-                location: location ? parseInt(location) : null,
-                description,
-                verification_code: verificationCode,
+                status: status || undefined,
+                location: location,
+                description: description || undefined,
+                verification_code: verificationCode || undefined,
             },
         })
     }
