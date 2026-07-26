@@ -1,21 +1,65 @@
-<body>
-<p>Hi 👋,</p>
-<p>Your Order with {{ seller }} is out for delivery by</p>
-<p> {{ partner }} and is on it's way to you. Use the below link
-    to track your order</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Out for Delivery | FastShip</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: #1e293b;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" style="max-width: 540px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); padding: 32px 24px; text-align: center;">
+                            <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">🚚 FastShip</h1>
+                            <p style="margin: 6px 0 0; font-size: 14px; color: #94a3b8;">Out For Delivery Update</p>
+                        </td>
+                    </tr>
 
-{% if verification_code%}
-<p>Share {{verification_code}} with delivery executive to recieve your package.</p>
-{% endif %}
-<a href="https://{{ app_domain if app_domain else 'udmbackend.vercel.app' }}/api/shipment/track?id={{ id }}"
-style="background:#2563eb;color:white;padding:10px 16px;
-text-decoration:none;border-radius:5px;"
->Track Now</a>
-<br>
-<p>Powered by FastShip</p>
-<hr>
-<p><strong>Item:</strong> {{ content }}</p>
-<p><strong>Destination:</strong> {{ destination }}</p>
-<p><strong>Estimated delivery:</strong> {{ estimated_delivery }}</p>
-<p>Thank you for shopping with us!</p>
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 36px 32px; text-align: center;">
+                            <div style="width: 56px; height: 56px; background-color: #fef3c7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px;">🛵</div>
+                            <h2 style="margin: 0 0 8px; font-size: 20px; font-weight: 700; color: #0f172a;">Your Package is Arriving Today!</h2>
+                            <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #475569;">
+                                Great news! Your order from <strong>{{ seller }}</strong> is out for delivery with courier <strong>{{ partner }}</strong>.
+                            </p>
+
+                            {% if verification_code %}
+                            <!-- Highlighted OTP Card -->
+                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border: 2px dashed #6366f1; border-radius: 16px; padding: 20px; margin-bottom: 28px;">
+                                <p style="margin: 0 0 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #4f46e5;">🔐 Doorstep Verification OTP</p>
+                                <div style="font-size: 36px; font-weight: 800; letter-spacing: 6px; color: #1e1b4b; font-family: monospace; margin: 6px 0;">{{ verification_code }}</div>
+                                <p style="margin: 0; font-size: 13px; color: #475569;">Share this 6-digit code ONLY with your delivery executive at your doorstep.</p>
+                            </div>
+                            {% endif %}
+
+                            <a href="https://{{ app_domain if app_domain else 'udmbackend.vercel.app' }}/api/shipment/track?id={{ id }}"
+                               style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);">
+                                Track Shipment Live →
+                            </a>
+
+                            <!-- Order Summary Box -->
+                            <div style="margin-top: 32px; text-align: left; background-color: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                                <p style="margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase;">Shipment Details</p>
+                                <p style="margin: 4px 0; font-size: 14px; color: #475569;"><strong>Item:</strong> {{ content }}</p>
+                                <p style="margin: 4px 0; font-size: 14px; color: #475569;"><strong>Destination Zip:</strong> {{ destination }}</p>
+                                <p style="margin: 4px 0; font-size: 14px; color: #475569;"><strong>Estimated Delivery:</strong> {{ estimated_delivery }}</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 20px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 FastShip Courier & Delivery Management. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
+</html>
