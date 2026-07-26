@@ -647,36 +647,28 @@ async def cancel_shipment(
 
 ### Public endpoint to track a shipment via query parameter: GET /shipment/track?id=<uuid>
 @router.get("/track", response_class=HTMLResponse, include_in_schema=False)
-async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep):
+async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep, session: SessionDep):
     shipment = await service.get(id)
     
-    context=shipment.model_dump()
+    context = shipment.model_dump()
     status_str = shipment.status.value if hasattr(shipment.status, "value") else str(shipment.status or "")
     context["status"] = status_str
     context["partner"] = shipment.delivery_partner.name if shipment.delivery_partner else "Not Assigned"
     context["seller"] = shipment.seller.name if shipment.seller else "FastShip Store"
     context["timeline"] = list(reversed(shipment.timeline)) if shipment.timeline else []
     
-    # Generate or retrieve 6-digit OTP when package is out_for_delivery
+    # Retrieve real 6-digit OTP code from DB / OTPService when out_for_delivery
     if "out_for_delivery" in status_str.lower():
-        from app.database.redis import get_shipment_verification_code, add_shipment_verification_code
-        from random import randint
-        try:
-            code = await get_shipment_verification_code(shipment.id)
-        except Exception:
-            code = None
-        if not code:
-            code = str(randint(100_000, 999_999))
-            try:
-                await add_shipment_verification_code(shipment.id, int(code))
-            except Exception:
-                pass
-        context["verification_code"] = str(code)
+        from services.otp import OTPService
+        otp_service = OTPService(session)
+        otp_record = await otp_service.repo.get_by_shipment_id(shipment.id)
+        if otp_record and not otp_record.is_used:
+            context["verification_code"] = otp_record.otp_code
+        else:
+            code = await otp_service.generate_and_send_otp(shipment)
+            context["verification_code"] = code
     else:
         context["verification_code"] = None
-    
-    
-    shipment.created_at.strftime("%d/%m/%Y, %H:%M")
     
     context["request"] = request
     template = Template(TRACK_HTML)
@@ -684,8 +676,8 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     return HTMLResponse(content=html_content)
 
 @router.get("/track-html", response_class=HTMLResponse)
-async def track_html(request: Request, id: UUID, service: ShipmentServiceDep):
-    return await track_shipment(request, id, service)
+async def track_html(request: Request, id: UUID, service: ShipmentServiceDep, session: SessionDep):
+    return await track_shipment(request, id, service, session)
 
 ###Get review form for a shipment
 @router.get("/review")
