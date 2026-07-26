@@ -7,112 +7,143 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "~/components/ui/dialog";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+
 
 import { type Shipment, type ShipmentEvent } from "~/lib/client";
 import ShipmentView from "./shipment-view";
 
-const statusColors = {
+const statusBadges = {
     placed: {
-        bgColor: "bg-blue-500",
-        outlineColor: "outline-blue-500",
+        label: "Placed",
+        badgeStyle: "bg-blue-50 text-blue-600 border-blue-200",
+        nodeStyle: "bg-blue-500 text-white shadow-md shadow-blue-500/20",
     },
     in_transit: {
-        bgColor: "bg-orange-500",
-        outlineColor: "outline-orange-500",
+        label: "In Transit",
+        badgeStyle: "bg-[#FFEFE8] text-[#FF6B4A] border-[#FF6B4A]/30",
+        nodeStyle: "bg-[#FF6B4A] text-white shadow-md shadow-[#FF6B4A]/20",
     },
     out_for_delivery: {
-        bgColor: "bg-lime-500",
-        outlineColor: "outline-lime-500",
+        label: "Out for Delivery",
+        badgeStyle: "bg-amber-50 text-amber-700 border-amber-200",
+        nodeStyle: "bg-amber-500 text-white shadow-md shadow-amber-500/20",
     },
     delivered: {
-        bgColor: "bg-green-400",
-        outlineColor: "outline-green-400",
+        label: "Delivered",
+        badgeStyle: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        nodeStyle: "bg-emerald-500 text-white shadow-md shadow-emerald-500/20",
     },
     cancelled: {
-        bgColor: "bg-grey-600",
-        outlineColor: "outline-grey-600",
+        label: "Cancelled",
+        badgeStyle: "bg-slate-100 text-slate-600 border-slate-200",
+        nodeStyle: "bg-slate-500 text-white shadow-md shadow-slate-500/20",
     },
 }
+
 const statusIcons = {
-    placed: <ArrowUp className="size-5 text-primary-foreground" />,
-    in_transit: <Truck className="size-5 text-primary-foreground" />,
-    out_for_delivery: <SquareArrowOutUpRight className="size-5 text-primary-foreground" />,
-    delivered: <PackageCheck className="size-5 text-primary-foreground" />,
-    cancelled: <PackageX className="size-5 text-primary-foreground" />,
+    placed: <ArrowUp className="size-4 text-white" />,
+    in_transit: <Truck className="size-4 text-white" />,
+    out_for_delivery: <SquareArrowOutUpRight className="size-4 text-white" />,
+    delivered: <PackageCheck className="size-4 text-white" />,
+    cancelled: <PackageX className="size-4 text-white" />,
 }
 
 export default function ShipmentCard({ shipment }: { shipment: Shipment }) {
     const timeline = shipment.timeline || [];
     const latestEvent = timeline.length > 0 ? timeline[timeline.length - 1] : null;
-    const latestStatus = (latestEvent?.status || "placed") as keyof typeof statusColors;
-    const statusColor = statusColors[latestStatus] || statusColors.placed;
+    const latestStatus = (latestEvent?.status || "placed") as keyof typeof statusBadges;
+    const badgeInfo = statusBadges[latestStatus] || statusBadges.placed;
 
     return (
-        <Card className="shadow-none" >
-            <CardHeader>
-                <div className="flex items-center space-x-4">
-                    <div className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-xl">
-                        <Package2 className="size-8" />
+        <div className="card-elevated-white flex flex-col justify-between p-6 bg-white rounded-3xl border border-[#FF6B4A]/15 shadow-md shadow-[#FF6B4A]/5 hover:shadow-xl hover:shadow-[#FF6B4A]/12 hover:-translate-y-1 transition-all duration-300">
+            <div>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#FF6B4A]/10">
+                    <div className="flex items-center gap-3">
+                        <div className="flex size-11 items-center justify-center rounded-2xl bg-[#FFEFE8] text-[#FF6B4A] border border-[#FF6B4A]/20">
+                            <Package2 className="size-5" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Shipment ID</span>
+                            <h3 className="font-extrabold text-slate-800 text-sm font-mono tracking-tight">#{shipment.id ? shipment.id.slice(-8) : "N/A"}</h3>
+                        </div>
                     </div>
+                    <span className={`px-3 py-1 text-xs font-extrabold rounded-full border ${badgeInfo.badgeStyle}`}>
+                        {badgeInfo.label}
+                    </span>
+                </div>
+
+                {/* Main Package Info */}
+                <div className="mb-4 rounded-xl bg-slate-50 p-3 border border-slate-100 flex items-center justify-between text-xs">
                     <div>
-                        <p className="text-gray-500">Shipment Number</p>
-                        <p className="font-l font-medium">{shipment.id ? shipment.id.slice(-10) : "N/A"}</p>
+                        <span className="text-slate-400 font-bold uppercase block text-[10px]">Contents</span>
+                        <span className="font-bold text-slate-700 truncate max-w-[140px] block">{shipment.content || "Parcel"}</span>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-slate-400 font-bold uppercase block text-[10px]">Weight</span>
+                        <span className="font-bold text-[#FF6B4A]">{shipment.weight ? `${shipment.weight} kg` : "N/A"}</span>
                     </div>
                 </div>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-                <div className="flex items-center space-x-4 rounded-xl p-[15px] bg-gray-100 relative">
-                    <div className="absolute left-[80px] top-0 bottom-0 w-0.5 bg-gray-300" />
-                    <div data-line className={`absolute left-[80px] top-[24px] bottom-0 w-0.5 ${statusColor.bgColor}`} />
-                    <div className="flex flex-col space-y-6 relative">
-                        {latestEvent && <TimelineEvent hasOutline={true} event={latestEvent} bgColor={statusColor.bgColor} outlineColor={statusColor.outlineColor} />}
-                        {
-                            timeline.length > 1 && timeline[timeline.length - 2] &&
-                            <TimelineEvent
-                                event={timeline[timeline.length - 2]}
-                                bgColor={statusColor.bgColor}
-                                outlineColor={statusColor.bgColor} />
-                        }
-                    </div>
+
+                {/* Timeline Events */}
+                <div className="relative pl-6 space-y-4 my-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#FF6B4A]/20">
+                    {latestEvent && <TimelineEvent event={latestEvent} nodeStyle={badgeInfo.nodeStyle} isLatest={true} />}
+                    {
+                        timeline.length > 1 && timeline[timeline.length - 2] &&
+                        <TimelineEvent
+                            event={timeline[timeline.length - 2]}
+                            nodeStyle="bg-slate-300 text-slate-600"
+                            isLatest={false}
+                        />
+                    }
                 </div>
-            </CardContent>
-            <CardFooter>
+            </div>
+
+            {/* Footer View Details Button */}
+            <div className="pt-4 border-t border-[#FF6B4A]/10 mt-2">
                 <Dialog>
-                    <DialogTrigger asChild className="w-full">
-                        <Button className="w-full">
-                            View Details <ChevronRight/>
-                        </Button>
+                    <DialogTrigger asChild>
+                        <button className="btn-coral-gradient flex w-full items-center justify-center gap-2 rounded-xl h-11 px-4 text-xs font-extrabold uppercase tracking-wider text-white shadow-md shadow-[#FF6B4A]/25 transition-all hover:scale-[1.01]">
+                            View Details <ChevronRight className="size-4" />
+                        </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[640px]">
+                    <DialogContent className="sm:max-w-[640px] rounded-3xl p-6 border-[#FF6B4A]/20 bg-white">
                         <DialogHeader>
-                            <DialogTitle>{`Shipment #${shipment.id}`}</DialogTitle>
-                            <DialogDescription>
-                                <ShipmentView shipment={shipment} />
+                            <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                                📦 Shipment #{shipment.id}
+                            </DialogTitle>
+                            <DialogDescription asChild>
+                                <div className="mt-4">
+                                    <ShipmentView shipment={shipment} />
+                                </div>
                             </DialogDescription>
                         </DialogHeader>
                     </DialogContent>
                 </Dialog>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     )
 }
 
-function TimelineEvent({ event, bgColor, outlineColor, hasOutline = false }: { event: ShipmentEvent, bgColor: string, outlineColor: string, hasOutline?: boolean }) {
+function TimelineEvent({ event, nodeStyle, isLatest }: { event: ShipmentEvent, nodeStyle: string, isLatest: boolean }) {
     if (!event) return null;
     const timeStr = event.created_at && event.created_at.includes("T") ? event.created_at.split("T")[1].slice(0, 5) : "--:--";
     const icon = statusIcons[event.status as keyof typeof statusIcons] || statusIcons.placed;
 
     return (
-        <div className="flex items-center gap-x-[15px]">
-            <p className="text-xs text-muted-foreground w-[30px]">
-                {timeStr}
-            </p>
-            <div className={`w-[40px] h-[40px] ${bgColor} text-foreground flex items-center justify-center rounded-full ${hasOutline ? `outline-2 ${outlineColor} outline-offset-2` : ''}`}>
+        <div className="relative flex items-center justify-between text-xs gap-3">
+            <div className={`absolute -left-[23px] flex size-5 items-center justify-center rounded-full ${nodeStyle}`}>
                 {icon}
             </div>
-            <p className="text-sm text-gray-800">{event.description || "Status updated"}</p>
+            <div className="flex-1 truncate">
+                <p className={`font-semibold truncate ${isLatest ? "text-slate-800 font-bold" : "text-slate-500"}`}>
+                    {event.description || event.status?.replace(/_/g, " ")}
+                </p>
+                {event.location && <span className="text-[10px] text-slate-400">Pincode: {event.location}</span>}
+            </div>
+            <span className="text-[10px] font-mono text-slate-400 shrink-0 font-bold bg-slate-100 px-2 py-0.5 rounded-md">
+                {timeStr}
+            </span>
         </div>
     );
 }
