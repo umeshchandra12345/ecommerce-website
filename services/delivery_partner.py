@@ -17,7 +17,7 @@ class DeliveryPartnerService(UserService):
     async def add(self, partner_create: DeliveryPartnerCreate) -> DeliveryPartner:
         partner: DeliveryPartner = await self._add_user(
             partner_create.model_dump(exclude={"serviceable_zip_codes"}),
-            "partner",
+            "/partner",
         )
         
         existing_zip_codes = {loc.zip_code for loc in (partner.servicable_locations or [])}

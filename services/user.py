@@ -68,6 +68,7 @@ class UserService(BaseService):
         if not base_url or "localhost" in base_url:
             protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
             base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
+        clean_prefix = f"/{router_prefix.strip('/')}" if router_prefix else ""
         try:
             if os.getenv("VERCEL") == "1":
                 await send_email_with_template_async(
@@ -75,7 +76,7 @@ class UserService(BaseService):
                     subject="Verify Your account with FastShip",
                     context={
                         "username": user.name,
-                        "verification_url": f"{base_url}/api{router_prefix}/verify?token={token}"
+                        "verification_url": f"{base_url}/api{clean_prefix}/verify?token={token}"
                     },
                     template_name="mail_email.verify.html",
                 )
@@ -85,7 +86,7 @@ class UserService(BaseService):
                     subject="Verify Your account with FastShip",
                     context={
                         "username": user.name,
-                        "verification_url": f"{base_url}/api{router_prefix}/verify?token={token}"
+                        "verification_url": f"{base_url}/api{clean_prefix}/verify?token={token}"
                     },
                     template_name="mail_email.verify.html",
                 )
@@ -145,6 +146,7 @@ class UserService(BaseService):
             protocol = "https" if (os.getenv("VERCEL") == "1" or "vercel" in app_settings.APP_DOMAIN) else "http"
             base_url = f"{protocol}://{app_settings.APP_DOMAIN}"
             
+        clean_prefix = f"/{router_prefix.strip('/')}" if router_prefix else ""
         import os
         try:
             if os.getenv("VERCEL") == "1":
@@ -153,7 +155,7 @@ class UserService(BaseService):
                     subject="FastShip Account Password Reset",
                     context={
                         "username": user.name,
-                        "reset_url": f"{base_url}/api{router_prefix}/reset_password_form?token={token}",
+                        "reset_url": f"{base_url}/api{clean_prefix}/reset_password_form?token={token}",
                     },
                     template_name="mail_password_reset.html",
                 )
@@ -163,7 +165,7 @@ class UserService(BaseService):
                     subject="FastShip Account Password Reset",
                     context={
                         "username": user.name,
-                        "reset_url": f"{base_url}/api{router_prefix}/reset_password_form?token={token}",
+                        "reset_url": f"{base_url}/api{clean_prefix}/reset_password_form?token={token}",
                     },
                     template_name="mail_password_reset.html",
                 )

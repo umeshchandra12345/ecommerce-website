@@ -23,7 +23,7 @@ class SellerService(UserService):
             data["zip_code"] = 0
         return await self._add_user(
             data,
-            "seller"
+            "/seller"
         )
     
     async def authenticate_seller(self, email: str, password: str) -> Seller | None:
