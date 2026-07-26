@@ -26,7 +26,7 @@ import { ShipmentStatus } from "~/lib/client"
 import { getShipmentsCountForStatus } from "~/lib/utils"
 
 export default function DashboardPage() {
-  const { token, user } = useContext(AuthContext)
+  const { token, user, logout } = useContext(AuthContext)
   
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -84,7 +84,11 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col gap-4 h-screen items-center justify-center">
         <h1 className="text-2xl font-bold">Error loading shipments</h1>
-        <Button onClick={() => refetch()}>Retry</Button>
+        <p className="text-muted-foreground text-sm">Your session may have expired or database was reset.</p>
+        <div className="flex gap-2">
+          <Button onClick={() => refetch()}>Retry</Button>
+          <Button variant="outline" onClick={logout}>Log In Again</Button>
+        </div>
       </div>
     )
   }
