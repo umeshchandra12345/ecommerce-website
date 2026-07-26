@@ -22,11 +22,17 @@ export function SubmitShipmentForm({
     },
     onError: (error) => {
       const apiError = error as AxiosError
-      toast.error(
-        apiError.status === 406 
-          ? "No delivery parterns are available" 
-          : "Failed to submit shipment"
-      )
+      const detail = (apiError.response?.data as any)?.detail
+      if (apiError.response?.status === 401) {
+        toast.error("Session expired. Please log in again.")
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"))
+      } else if (apiError.response?.status === 406) {
+        toast.error("No delivery partners are available for this destination.")
+      } else if (typeof detail === "string") {
+        toast.error(detail)
+      } else {
+        toast.error("Failed to submit shipment. Please try again.")
+      }
     }
   })
 
