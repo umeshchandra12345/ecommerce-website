@@ -54,16 +54,14 @@ class ShipmentService(BaseService):
         
         shipment = await self._add(shipment)
         
-        event=await self.event_service.add(
+        await self.event_service.add(
             shipment=shipment,
             location=seller.zip_code,
             status=ShipmentStatus.placed,
             description=f"assigned to {partner.name}"
         )
         
-        shipment.timeline.append(event)
-        
-        return shipment 
+        return await self.get(shipment.id) 
         
 
     async def update(self,id:UUID, shipment_update: ShipmentUpdate,partner:DeliveryPartner) -> Shipment:
