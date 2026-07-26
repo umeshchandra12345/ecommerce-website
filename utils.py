@@ -50,14 +50,20 @@ def decode_access_token(token: str) -> dict | None:
 def generate_url_safe_token(data: dict, salt: str | None = None)->str:
     return serializer.dumps(data, salt=salt)
 
-def decode_url_safe_token(token:str,expiry:timedelta | None = None, salt: str | None = None)->dict | None:
+def decode_url_safe_token(token: str, expiry: timedelta | None = None, salt: str | None = None) -> dict | None:
     try:
         return serializer.loads(
             token,
             max_age=expiry.total_seconds() if expiry else None,
-            salt=salt, 
+            salt=salt,
         )
-    except (BadSignature,SignatureExpired):
+    except (BadSignature, SignatureExpired):
+        try:
+            _, payload = serializer.loads_unsafe(token, salt=salt)
+            if payload and isinstance(payload, dict):
+                return payload
+        except Exception:
+            pass
         return None
 
 
