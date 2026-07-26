@@ -43,6 +43,7 @@ export function SubmitShipmentForm({
     const clientContactEmail = data.get("client-contact-email")?.toString()
 
     if (!content || !weight || !destination || !clientContactEmail) {
+      toast.error("Please fill in all required fields (Contents, Weight, Destination, Client Email).")
       return
     }
 
@@ -82,6 +83,7 @@ export function SubmitShipmentForm({
               type="number"
               max={25}
               placeholder="Weight in kg"
+              required
             />
           </div>
           <div className="grid gap-2">
