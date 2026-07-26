@@ -693,7 +693,7 @@ async def get_review_form(request: Request, token: str, service: ShipmentService
     except Exception:
         return templates.TemplateResponse(
             request=request,
-            name="reset_failed.html",
+            name="review_failed.html",
             context={
                 "message": "This review link is invalid, expired, or the shipment no longer exists."
             }
@@ -724,7 +724,7 @@ async def submit_review(
             raise HTTPException(status_code=400, detail=str(exc))
         return templates.TemplateResponse(
             request=request,
-            name="reset_failed.html",
+            name="review_failed.html",
             context={
                 "message": "Unable to save your review. The token may be invalid, expired, or the shipment no longer exists."
             }
