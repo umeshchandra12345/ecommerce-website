@@ -73,6 +73,11 @@ export function UpdateShipmentForm({
         },
         onError: (error: any) => {
             console.error("Update shipment error:", error)
+            if (error?.response?.status === 401) {
+                toast.error("Session expired. Please log in again.")
+                window.dispatchEvent(new CustomEvent("auth:unauthorized"))
+                return
+            }
             const detail = error?.response?.data?.detail
             let errorMsg = "Failed to update shipment"
             if (typeof detail === "string") {
