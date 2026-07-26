@@ -83,8 +83,8 @@ export function SubmitShipmentForm({
             <Input
               id="destination"
               name="destination"
-              type="destination"
-              placeholder="11001"
+              type="number"
+              placeholder="110001"
               required
             />
           </div>

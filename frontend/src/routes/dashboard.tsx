@@ -37,7 +37,7 @@ export default function DashboardPage() {
     return <Navigate to="/" />
   }
 
-  const { isLoading, isError, data, refetch } = useQuery({
+  const { isFetching, isError, data, refetch } = useQuery({
     queryKey: ["shipments", user, token, search, statusFilter, page],
     queryFn: async () => {
       if (!user) return { items: [], totalPages: 1 }
@@ -120,7 +120,7 @@ export default function DashboardPage() {
 
         <div className="flex flex-1 flex-col gap-6 p-6">
           {/* Top Analytics Cards */}
-          {isLoading || !data ? (
+          {isFetching && !data ? (
             <Loading />
           ) : (
             <>

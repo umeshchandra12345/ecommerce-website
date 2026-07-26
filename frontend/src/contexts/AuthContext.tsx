@@ -18,16 +18,32 @@ const AuthContext = createContext<AuthContextType>({
 })
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [token, setToken] = useState<string|null>()
-    const [user, setUser] = useState<UserType>()
+    const [token, setToken] = useState<string | null | undefined>(() => {
+        if (typeof window !== 'undefined') {
+            const t = sessionStorage.getItem("token")
+            if (t) {
+                api.setSecurityData(t)
+                return t
+            }
+            return null
+        }
+        return undefined
+    })
+    const [user, setUser] = useState<UserType | undefined>(() => {
+        if (typeof window !== 'undefined') {
+            return (sessionStorage.getItem("user") as UserType) || undefined
+        }
+        return undefined
+    })
     const navigate = useNavigate()
 
     useEffect(() => {
-        const token = sessionStorage.getItem("token")
-        if (token) {
-            setToken(token)
-            setUser(sessionStorage.getItem("user") as UserType)
-            api.setSecurityData(token)
+        const storedToken = sessionStorage.getItem("token")
+        const storedUser = sessionStorage.getItem("user") as UserType
+        if (storedToken) {
+            setToken(storedToken)
+            setUser(storedUser)
+            api.setSecurityData(storedToken)
         } else {
             setToken(null)
         }
